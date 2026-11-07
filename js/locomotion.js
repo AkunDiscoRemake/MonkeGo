@@ -12,7 +12,9 @@ const LOCO=(function(){
   const L={was:[false,false],anchor:null,climbVel:new THREE.Vector3(),hist:[],desiredW:[new THREE.Vector3(),new THREE.Vector3()],grabbed:false};
   const _d=new THREE.Vector3(),_n=new THREE.Vector3(),_ax=new THREE.Vector3(),_q=new THREE.Quaternion(),_hq=new THREE.Quaternion(),_v=new THREE.Vector3(),_w=new THREE.Vector3(),UP=new THREE.Vector3(0,1,0);
   let L1b=0,L2b=0;
-  L.applyTune=()=>{TUNE.imp=SETTINGS.impulse;TUNE.jmp=1+(SETTINGS.impulse-1)*.32;TUNE.grav=SETTINGS.gravity;TUNE.fric=SETTINGS.friction;TUNE.max=SETTINGS.maxSpeed;SHOW_NAMES=!!SETTINGS.names};
+  // Velocidade do movimento: Rápido = valores atuais; Médio/Lento reduzem impulso, velocidade máxima, pulo e assistência
+  L.speedMul=()=>({fast:1,medium:.7,slow:.45})[SETTINGS.speedMode]||1;
+  L.applyTune=()=>{const k=L.speedMul();TUNE.imp=SETTINGS.impulse*k;TUNE.jmp=(1+(SETTINGS.impulse-1)*.32)*Math.sqrt(k);TUNE.grav=SETTINGS.gravity;TUNE.fric=SETTINGS.friction;TUNE.max=SETTINGS.maxSpeed*k;TUNE.spd=k;SHOW_NAMES=!!SETTINGS.names;window.MUSIC&&MUSIC.volume()};
   L.applyArms=()=>{if(!LM||!LM.uL)return;if(!L1b){L1b=L1;L2b=L2}const k=SETTINGS.arm;
     [LM.uL,LM.uR].forEach(b=>b&&b.scale.setScalar(k));for(const id in RO){const M=RO[id];[M.uL,M.uR].forEach(b=>b&&b.scale.setScalar(k))}
     L1=L1b*k;L2=L2b*k;ARM=(L1+L2)*.98};
@@ -62,7 +64,7 @@ const LOCO=(function(){
     vel.copy(L.climbVel);return true};
   function release(){L.anchor=null;
     // arremesso: velocidade do último gesto × impulso (bem maior que o padrão, mas limitado)
-    const boost=Math.min(1.8,.75+.35*SETTINGS.impulse);vel.multiplyScalar(boost);const h=Math.hypot(vel.x,vel.z),mx=TUNE.max*1.3;if(h>mx){vel.x*=mx/h;vel.z*=mx/h}
+    const boost=Math.min(1.8,.75+.35*SETTINGS.impulse*L.speedMul());vel.multiplyScalar(boost);const h=Math.hypot(vel.x,vel.z),mx=TUNE.max*1.3;if(h>mx){vel.x*=mx/h;vel.z*=mx/h}
     if(vel.y>8*TUNE.jmp)vel.y=8*TUNE.jmp}
   L.release=release;
   L.reset=()=>{L.anchor=null;L.was[0]=L.was[1]=false;L.hist.length=0};
@@ -70,7 +72,7 @@ const LOCO=(function(){
   HOOK.move=(fw,rt,grounded)=>{const r={x:0,z:0,jump:false};if(INPUT.context=='menu')return r;
     if(INPUT.has('jump'))r.jump=true;
     const tl=INPUT.has('turnL'),tr=INPUT.has('turnR');if(tl||tr){const a=(SETTINGS.snap==2?45:30)*Math.PI/180*(tl?1:-1);if(VRP.vrActive())VRP.turn(a);else yw+=a}
-    const pm=INPUT.padMove();if(pm&&SETTINGS.assist>0){const k=pm.r*SETTINGS.assist*(grounded?1:.6);r.z=-pm.y/Math.hypot(pm.x,pm.y)*k;r.x=pm.x/Math.hypot(pm.x,pm.y)*k}
+    const pm=INPUT.padMove();if(pm&&SETTINGS.assist>0){const k=pm.r*SETTINGS.assist*(grounded?1:.6)*L.speedMul();r.z=-pm.y/Math.hypot(pm.x,pm.y)*k;r.x=pm.x/Math.hypot(pm.x,pm.y)*k}
     return r};
   HOOK.padFilter=g=>g&&INPUT.isVRPad(g)?null:g;
   HOOK.inputLocked=()=>INPUT.context=='menu';

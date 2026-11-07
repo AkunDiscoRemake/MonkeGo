@@ -37,6 +37,10 @@ const MAPS=(function(){
   M.load=async()=>{M.cur=byId(SETTINGS.map).id;await loadParkMap();M.loaded=true;
     // limites verticais (para o Lava Run)
     const b=new THREE.Box3();mapMeshes.forEach(m=>{m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox)});M.minY=b.min.y;M.maxY=b.max.y};
-  HOOK.spawn=()=>M.spawn();
+  // multiplayer: cada jogador nasce num ponto diferente ao redor do spawn (senão o pegador/infectado
+  // encosta em todos no mesmo instante)
+  function spread(s){for(let k=0;k<30;k++){const a=Math.random()*6.283,r=1.3+Math.random()*2.4,x=s.x+Math.cos(a)*r,z=s.z+Math.sin(a)*r;
+      const h=hit(_o.set(x,s.y+1.2,z),DOWN,4.5);if(!h||h.n.y<.7||Math.abs(h.point.y-(s.y-1.12))>1.6)continue;if(hit(_o.set(x,h.point.y+.1,z),_u,1.6))continue;return V3(x,h.point.y+1.12,z)}return s}
+  HOOK.spawn=()=>{let s=M.spawn();if(!NET.peer)return s;if(!s)s=isNewbie?V3(59.32,17.21,-23.61):V3(3.60,6.30,-6.49);return spread(s)};
   HOOK.mapId=()=>'park';
   return M})();

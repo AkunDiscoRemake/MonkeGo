@@ -39,7 +39,9 @@ espere 1,5 s (ou toque na tela). O toque continua sendo o pulo, como no original
 - **Cabeça**: define a direção do corpo.
 - **Física**: o impulso original multiplicado por *Força do impulso* (padrão **2,2×**), limitado pela
   *Velocidade máxima*; colisão contínua vertical para impulsos fortes não atravessarem o chão.
-- Ajustáveis (lobby → AJUSTES, ou menu VR → Configurações): força do impulso, velocidade máxima,
+- **Velocidade do movimento**: *Rápido* (padrão, valores atuais), *Médio* (70 %) ou *Lento* (45 %) —
+  escala impulso, velocidade máxima, pulo, arremesso, assistência e teclado/gamepad de uma vez.
+- Ajustáveis (lobby → AJUSTES, ou menu VR → Configurações): velocidade do movimento, força do impulso, velocidade máxima,
   gravidade, atrito, sensibilidade, assistência, comprimento dos braços, qualidade gráfica, mão do
   controle, giro, nomes. Valores ficam salvos no navegador.
 
@@ -54,6 +56,37 @@ espere 1,5 s (ou toque na tela). O toque continua sendo o pulo, como no original
   **placar** (menu VR → Placar: quem está com o pegador/infectado e quantos tags cada um fez).
   Como o multiplayer já existia, **não foi usado Supabase** (não há SQL a configurar).
   As salas usam o prefixo `monkego-` e PeerJS 1.3.2 (ver Limitações).
+
+### O que foi corrigido para o multiplayer funcionar de verdade
+
+- **TURN**: o TURN padrão do PeerJS não é confiável; agora usa STUN do Google + TURN público
+  *Open Relay* (metered.ca) com credenciais temporárias geradas no navegador (HMAC-SHA1, padrão coturn),
+  então jogadores em 4G/NAT restritivo conseguem conectar.
+- **Timeouts**: entrar numa sala esperava só 2,5 s; pela internet a conexão demora mais e cada jogador
+  acabava criando a própria sala. Agora 8–10 s (salas inexistentes continuam sendo descartadas na hora).
+- **Spawn espalhado** no online: antes todos nasciam no mesmo ponto e a Infecção acabava na hora.
+- **Migração de host**: se o host sai (ou some — heartbeat de 5 s), os outros reconectam à mesma sala e
+  o primeiro vira o novo host, sem voltar ao solo.
+- **Reconexão** ao servidor PeerJS quando o websocket ocioso cai; conexões mortas são removidas.
+- **Salas públicas se unem**: quem ficou sozinho em `pub2..6` por 20 s volta a procurar a partir da `pub1`.
+- HUD mostra sala, nº de jogadores e se você é o pegador; aviso claro quando está offline.
+
+Testado com 3 navegadores reais conectando pelo servidor PeerJS público (sala por código, infecção,
+saída do host com migração) e entrada rápida com 2 jogadores.
+
+## Música
+
+Música chill de fundo, **CC0 (domínio público)**, do OpenGameArt, tocando em sequência:
+
+| Faixa | Autor | Fonte |
+|---|---|---|
+| Chill Lofi Inspired | omfgdude | https://opengameart.org/content/chill-lofi-inspired |
+| Lofi Hip Hop | omfgdude | https://opengameart.org/content/lofi-hip-hop |
+| Napping On A Cloud | congusbongus | https://opengameart.org/content/napping-on-a-cloud |
+
+Reconvertidas para MP3 80 kbps (`assets/music/`), tocadas por streaming (só a faixa atual é baixada).
+Volume em AJUSTES/menu VR (0 = desligada); *Próxima música* no lobby e no menu VR (item Música:
+◀ ▶ volume, clique troca a faixa). A música abaixa quando a lava chega perto no Lava Run.
 
 ## Mapas
 
@@ -107,7 +140,9 @@ escalada) e no modo celular/Cardboard. **Não foi testado em um Oculus Go físic
   transcoder; as texturas do jogo já são pequenas (JPEG/PNG ≤ 256 px no mapa).
 - **Multiplayer** depende do servidor público PeerJS (0.peerjs.com) e de conexões P2P (WebRTC); redes com
   NAT restritivo podem falhar. Salas MONKE GO não se misturam com as do Gorilla Rush original.
-- **Áudio** só inicia após um toque/clique (política dos navegadores).
+- **Áudio/música** só iniciam após um toque/clique (política dos navegadores).
+- O TURN *Open Relay* é um serviço gratuito de terceiros, sem garantia de disponibilidade; se cair,
+  conexões entre redes muito restritivas podem falhar (redes comuns funcionam só com STUN).
 - A origem dos modelos do mapa e do macaco é a da source original; a camisa havaiana é CC BY 4.0
   (“Gorilla Tag Hawaiian T-shirt” por That-one-ripper, Sketchfab). Confirme as licenças da source antes
   de distribuir comercialmente.
@@ -125,9 +160,10 @@ js/locomotion.js      Gorilla Locomotion 3DoF híbrido
 js/maps.js            áreas do mapa original
 js/modes.js           SoloPlay, Lava Run, placar
 js/vrmenu.js          menu VR 3D e HUD 3D
+js/music.js           música de fundo (playlist CC0)
 js/main.js            boot e lobby
 lib/                  three r128, GLTFLoader, SkeletonUtils, PeerJS 1.3.2 (sem CDN obrigatório)
-assets/               modelo, acessórios, mapa, texturas, sons, fonte (extraídos do original)
+assets/               modelo, acessórios, mapa, texturas, sons, fonte (extraídos do original) + music/ (CC0)
 original/             o HTML original do Gorilla Rush, intacto
 ```
 

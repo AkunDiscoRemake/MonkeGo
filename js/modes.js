@@ -7,22 +7,32 @@ const MODES=(function(){
   const Mo={cur:'solo'};
   // ---------- troca de modo ----------
   function leaveNet(){const p=NET.peer;NET.hc=null;NET.conns={};NET.peer=null;try{p&&p.destroy()}catch(e){}
-    for(const k in RM)delete RM[k];itId=null;INF={};SCORE={}}
+    for(const k in RM)delete RM[k];itId=null;INF={};SCORE={};HUD3D.set('net','')}
   Mo.leaveNet=leaveNet;
   Mo.start=(m,code)=>{if(state=='play')leaveNet();
     if(m=='solo'||m=='lava')return enter(m);
     if(m=='tag')return enter('quick');
     pickCode=(code||'MONKEGO').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)||'MONKEGO';return enter('join',m)};
   HOOK.enter=(mode,vr)=>{Mo.cur=mode=='quick'?'tag':mode=='join'?(vr=='inf'?'inf':'cas'):mode;SETTINGS.mode=Mo.cur;SETTINGS.save()};
-  HOOK.roomClosed=()=>{leaveNet();Mo.start('solo')};
-  HOOK.startGame=()=>{lava.reset();HUD3D.set('mode','');if(Mo.cur=='lava')lava.begin()};
+  // host saiu: todos tentam a MESMA sala de novo com atraso aleatório -> o primeiro vira o novo host (migração)
+  HOOK.roomClosed=()=>{if(Mo.migrating)return;Mo.migrating=true;setTimeout(()=>Mo.migrating=false,4000);const m=Mo.cur,c=NET.code;leaveNet();toast('O host saiu — reconectando…',3000);setTimeout(()=>{if(state=='play')Mo.start(m,c)},400+Math.random()*1800)};
+  HOOK.startGame=()=>{lava.reset();HUD3D.set('mode','');aloneT=0;if(Mo.cur=='lava')lava.begin();
+    if(Mo.cur=='tag'||Mo.cur=='inf'||Mo.cur=='cas'){if(NET.peer)toast('Online · sala '+NET.code+(NET.host?' (você é o host)':''),3500);else toast('Sem conexão com o servidor multiplayer — jogando offline. Verifique a internet.',6000)}};
+  let aloneT=0,netT=0;
+  function netUpdate(dt){if(!NET.peer)return;const n=1+Object.keys(RM).length;
+    // heartbeat: o host manda estado a cada 80 ms; 5 s sem nada = host caiu (aba fechada, rede) -> migração
+    if(!NET.host&&NET.hc&&NET.lastS&&performance.now()-NET.lastS>5000){NET.lastS=0;HOOK.roomClosed();return}
+    // duas pessoas que entram juntas podem cair em salas públicas diferentes: o host sozinho numa sala pub2..6 volta a procurar a partir da pub1
+    if(NET.host&&NET.pub&&NET.code!=='pub1'&&n<2){aloneT+=dt;if(aloneT>20){aloneT=0;leaveNet();Mo.start('tag');return}}else aloneT=0;
+    netT-=dt;if(netT>0||NET.mode=='inf')return;netT=.5;
+    HUD3D.set('net',(NET.mode=='tag'&&NET.pub?(itId===me.id?'VOCÊ É O PEGADOR!':itId?'FUJA DO PEGADOR':'ESPERANDO JOGADORES'):'CASUAL')+'<small>SALA '+NET.code+' · '+n+(n>1?' JOGADORES':' JOGADOR')+'</small>')}
   Mo.onArea=()=>{if(Mo.cur=='lava')lava.begin()};
   Mo.label=m=>({solo:'SoloPlay',lava:'Lava Run',tag:'Tag (público)',inf:'Infecção',cas:'Casual'})[m||Mo.cur]||m;
   // ---------- Lava Run ----------
   const lmat=new THREE.MeshBasicMaterial({map:LAVA,color:0xffffff,fog:false});
   const lmesh=new THREE.Mesh(new THREE.PlaneGeometry(420,420,1,1).rotateX(-Math.PI/2),lmat);lmesh.visible=false;lmesh.frustumCulled=false;lmesh.renderOrder=2;S.add(lmesh);
   const lava={on:false,y:-99,t0:0,dead:0,best:0,won:0,tick:0,
-    reset(){this.on=false;lmesh.visible=false;this.dead=0;this.won=0;FOG.color.setHex(0xbde0ff);snd.stop()},
+    reset(){this.on=false;lmesh.visible=false;this.dead=0;this.won=0;FOG.color.setHex(0xbde0ff);snd.stop();MUSIC.setDuck(1)},
     begin(){this.reset();this.on=true;P.copy(spawnPos());vel.set(0,0,0);this.y=P.y-1.1-4.5;this.t0=performance.now()+4000;this.tick=0;
       this.top=(MAPS.maxY||30)-1.5;try{this.best=+localStorage.getItem('monke_lava_'+MAPS.cur)||0}catch(e){this.best=0}
       LAVA.repeat.set(60,60);lmesh.visible=true;snd.start();toast('LAVA RUN: suba o mais alto que puder!',3000)},
@@ -33,7 +43,7 @@ const MODES=(function(){
       lmesh.position.y=this.y;LAVA.offset.x=(now*.00002)%1;LAVA.offset.y=(now*.000013)%1;
       const feet=P.y-1.1,dist=feet-this.y;
       // efeito visual: névoa alaranjada quando perto
-      const k=Math.max(0,Math.min(1,1-dist/6));FOG.color.setRGB(.74+.26*k,.88-.45*k,1-.8*k);snd.level(k);
+      const k=Math.max(0,Math.min(1,1-dist/6));FOG.color.setRGB(.74+.26*k,.88-.45*k,1-.8*k);snd.level(k);MUSIC.setDuck(1-.6*k);
       const sec=Math.max(0,t);
       if(this.y>=this.top&&!this.won){this.won=now+12000}
       if(this.won&&now>this.won){this.finish(sec,true);return}
@@ -57,5 +67,5 @@ const MODES=(function(){
   // ---------- placar (Tag/Infecção) ----------
   Mo.scoreLines=()=>{const rows=[{id:me.id,n:me.nick+' (você)'}];for(const k in RM)rows.push({id:k,n:RM[k].n||'?'});
     return rows.map(r=>{const st=NET.mode=='inf'?(INF[r.id]?'INFECTADO':'livre'):(itId===r.id?'PEGADOR':'');return {n:r.n,st,sc:SCORE[r.id]||0}}).sort((a,b)=>b.sc-a.sc)};
-  Mo.update=(dt,now)=>{lava.update(dt,now)};
+  Mo.update=(dt,now)=>{lava.update(dt,now);netUpdate(dt)};
   return Mo})();

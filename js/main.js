@@ -30,7 +30,7 @@ const _chk=chk;chk=function(){_chk();const ok=!!(pl&&mapDone);['solo','lava','vr
 HOOK.enterFail=()=>chk();
 
 // ---------- iniciar (sempre dentro do gesto do usuário: requestSession/requestPresent exigem isso) ----------
-function launch(fn,openMenu){initAudio();VRP.start(SETTINGS.vrApi);fn();
+function launch(fn,openMenu){initAudio();MUSIC.start();VRP.start(SETTINGS.vrApi);fn();
   if(openMenu){const t=setInterval(()=>{if(state=='play'){clearInterval(t);VRMENU.open_()}},200)}}
 $('solo').onclick=()=>launch(()=>MODES.start('solo'));
 $('lava').onclick=()=>launch(()=>MODES.start('lava'));
@@ -41,6 +41,7 @@ $('vrgo').onclick=()=>launch(()=>MODES.start(SETTINGS.mode=='lava'?'lava':'solo'
 $('pvr').onclick=()=>{MENU2D.show(false);VRP.start(SETTINGS.vrApi)};
 $('pflat').onclick=()=>MENU2D.show(false);
 $('plobby').onclick=()=>location.reload();
+$('mnext').onclick=()=>{MUSIC.start();MUSIC.next()};
 // Oculus Go (WebVR): ao colocar o headset/abrir a página em VR o navegador dispara vrdisplayactivate,
 // onde requestPresent é permitido sem clique.
 addEventListener('vrdisplayactivate',()=>{if(state=='lobby'&&pl&&mapDone&&PLATFORM.pickApi(SETTINGS.vrApi)==='webvr')launch(()=>MODES.start('solo'),true)});

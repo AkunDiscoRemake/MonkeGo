@@ -34,7 +34,7 @@ const PLATFORM=(function(){
 // ---------- configurações (persistentes em localStorage) ----------
 const SETTINGS=(function(){
   const D={impulse:2.2,maxSpeed:9,gravity:9.8,friction:5.5,sens:1.25,assist:.5,quality:PLATFORM.isGo?0:-1,
-    arm:1.22,simHand:1,snap:1,names:1,handed:'auto',vrApi:'auto',map:'forest',mode:'solo',reach:1};
+    arm:1.22,simHand:1,speedMode:'fast',music:.35,snap:1,names:1,handed:'auto',vrApi:'auto',map:'forest',mode:'solo',reach:1};
   const S=Object.assign({},D);
   try{const j=JSON.parse(localStorage.getItem('monke_settings')||'{}');for(const k in D)if(k in j&&typeof j[k]===typeof D[k])S[k]=j[k]}catch(e){}
   S.defaults=D;
@@ -44,6 +44,8 @@ const SETTINGS=(function(){
 
 // Faixas/rótulos usados pelo menu VR e pelo lobby 2D (um único lugar = sem divergência).
 const SETTING_DEFS=[
+  {k:'speedMode',l:'Velocidade do movimento',opts:[['fast','Rápido (atual)'],['medium','Médio'],['slow','Lento']]},
+  {k:'music',l:'Volume da música',min:0,max:1,step:.05,f:v=>v<=0?'Desligada':Math.round(v*100)+'%'},
   {k:'impulse',l:'Força do impulso',min:1,max:4,step:.1,f:v=>v.toFixed(1)+'x'},
   {k:'maxSpeed',l:'Velocidade máxima',min:4,max:16,step:.5,f:v=>v.toFixed(1)+' m/s'},
   {k:'gravity',l:'Gravidade',min:4,max:14,step:.2,f:v=>v.toFixed(1)},

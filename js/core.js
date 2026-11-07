@@ -48,7 +48,7 @@ function hit(o,d,far){const ex=o.x+d.x*far,ez=o.z+d.z*far,a0=Math.floor(Math.min
 function faceQ(f){return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(V3(-f.z,0,f.x),V3(0,1,0),V3(-f.x,0,-f.z)))}
 // ---------- estado ----------
 // TUNE: parâmetros físicos ajustáveis (Gorilla Locomotion). Valores 1/9.8/5.5/6 = jogo original.
-const TUNE={imp:1,jmp:1,grav:9.8,fric:5.5,max:6};
+const TUNE={imp:1,jmp:1,grav:9.8,fric:5.5,max:6,spd:1};
 let state='lobby',mapG=null,mapMeshes=[],pl=null,pg=new THREE.Group(),LM=null,mats=[],spawn=V3(0,5,0),floorMin=-50,stumpTop=null,mapDone=false,L1=.5,L2=.5,ARM=1,color='#ffffff';
 const P=V3(),vel=V3(),me={id:'me',nick:'Gorilla'},RM={},RO={},bots=[];let itId=null,cd=0,tstart=0,NET={peer:null,host:true,hc:null,conns:{},pub:true,mode:'tag',code:''},pit=0,yw=0,gyro=false;
 function chk(){refreshAcc();if(pl&&mapDone){['qj','jn'].forEach(i=>$(i).disabled=false);st('Pronto! Escolha um nome e uma cor.')}}['qj','jn'].forEach(i=>$(i).disabled=true);
@@ -205,14 +205,27 @@ const NP='monkego-'; // prefixo próprio: salas MONKE GO não se misturam com cl
 let INF={},iPh='wait',iEnd=0,iRem=0,iAt=0,REMI=0,pickCode='',hudS='';
 const isIt=id=>NET.mode=='inf'?!!INF[id]:id===itId;
 function sfx(v){return v=='inf'?'-I':'-C'}
-function initPeer(id){return new Promise((res,rej)=>{if(!window.Peer)return rej('sem PeerJS');const p=new Peer(id||undefined,{debug:0});const to=setTimeout(()=>rej('timeout'),7000);p.on('open',()=>{clearTimeout(to);res(p)});p.on('error',e=>{if(e.type=='peer-unavailable'){NET.pend&&NET.pend(false);return}clearTimeout(to);rej(e.type||String(e))})})}
+// ---------- ICE (NAT traversal) ----------
+// Sem TURN, jogadores em redes com NAT restritivo (4G, redes corporativas) não se conectam.
+// Open Relay (metered.ca) é um TURN público gratuito; usa segredo compartilhado (coturn "use-auth-secret"):
+// usuário = "<expiração>:<nome>", senha = base64(HMAC-SHA1(segredo, usuário)).
+let _ice=null;
+async function iceServers(){if(_ice)return _ice;const L=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:staticauth.openrelay.metered.ca:80'}];
+ try{if(window.crypto&&crypto.subtle&&window.TextEncoder){const user=(Math.floor(Date.now()/1000)+86400)+':monkego',enc=new TextEncoder();
+  const k=await crypto.subtle.importKey('raw',enc.encode('openrelayprojectsecret'),{name:'HMAC',hash:'SHA-1'},false,['sign']);
+  const sig=new Uint8Array(await crypto.subtle.sign('HMAC',k,enc.encode(user)));let b='';for(let i=0;i<sig.length;i++)b+=String.fromCharCode(sig[i]);const cred=btoa(b);
+  ['turn:staticauth.openrelay.metered.ca:80','turn:staticauth.openrelay.metered.ca:443','turn:staticauth.openrelay.metered.ca:443?transport=tcp','turns:staticauth.openrelay.metered.ca:443?transport=tcp'].forEach(u=>L.push({urls:u,username:user,credential:cred}))}}catch(e){console.warn('TURN',e)}
+ return _ice=L}
+async function initPeer(id){const ice=await iceServers();return new Promise((res,rej)=>{if(!window.Peer)return rej('sem PeerJS');const p=new Peer(id||undefined,{debug:0,config:{iceServers:ice}});const to=setTimeout(()=>{try{p.destroy()}catch(e){}rej('timeout')},12000);p.on('open',()=>{clearTimeout(to);res(p)});
+  // o servidor PeerJS derruba websockets ociosos: reconecta para continuar recebendo novos jogadores
+  p.on('disconnected',()=>{if(!p.destroyed&&NET.peer===p)setTimeout(()=>{try{if(!p.destroyed)p.reconnect()}catch(e){}},1500)});p.on('error',e=>{if(e.type=='peer-unavailable'){NET.pend&&NET.pend(false);return}clearTimeout(to);rej(e.type||String(e))})})}
 function hostListen(){NET.peer.on('connection',c=>{c.on('open',()=>{if(Object.keys(NET.conns).length>=7){c.send({t:'full'});setTimeout(()=>c.close(),300);return}NET.conns[c.peer]=c;c.send({t:'hello',pub:NET.pub,code:NET.code,mode:NET.mode,map:HOOK.mapId?HOOK.mapId():''})});
  c.on('data',m=>{if(m.t=='p'){const h=m.h||[0,0,0,0,0,0];RM[c.peer]={i:c.peer,x:m.x,y:m.y,z:m.z,w:m.w,p:m.p,h,c:m.c,n:m.n,o:m.o,a:m.a,t:performance.now()}}});
  const gone=()=>{delete NET.conns[c.peer];delete RM[c.peer];if(itId===c.peer)itId=null};c.on('close',gone);c.on('error',gone)})}
-function tryJoin(code,ms=3000){return new Promise(res=>{let done=false;const fin=v=>{if(!done){done=true;clearTimeout(to);NET.pend=null;res(v)}};const c=NET.peer.connect(NP+code,{reliable:true}),to=setTimeout(()=>{try{c.close()}catch(e){}fin(false)},ms);NET.pend=v=>{fin(v)};
+function tryJoin(code,ms=8000){return new Promise(res=>{let done=false;const fin=v=>{if(!done){done=true;clearTimeout(to);NET.pend=null;res(v)}};const c=NET.peer.connect(NP+code,{reliable:true}),to=setTimeout(()=>{try{c.close()}catch(e){}fin(false)},ms);NET.pend=v=>{fin(v)};
   c.on('data',m=>{if(m.t=='full'){fin(false);c.close();return}if(m.t=='hello'){NET.hc=c;NET.host=false;NET.pub=m.pub;NET.code=m.code;if(m.mode)NET.mode=m.mode;if(m.map&&HOOK.remoteMap)HOOK.remoteMap(m.map);fin(true);return}netData(m)});
   c.on('close',()=>{if(done&&NET.hc===c&&state=='play'){toast('A sala foi fechada.');if(HOOK.roomClosed)HOOK.roomClosed();else location.reload()}})})}
-function netData(m){if(m.t!='s')return;const seen={};m.e.forEach(e=>{if(e.i===me.id)return;seen[e.i]=1;RM[e.i]=Object.assign(e,{t:performance.now()})});for(const k in RM)if(!seen[k])delete RM[k];itId=m.it;if(m.mp&&HOOK.remoteMap)HOOK.remoteMap(m.mp);if(m.sc)SCORE=m.sc;if(NET.mode=='inf'){INF={};(m.inf||[]).forEach(i=>INF[i]=1);iPh=m.ph||'wait';iRem=m.ir||0;iAt=performance.now()}}
+function netData(m){if(m.t!='s')return;NET.lastS=performance.now();const seen={};m.e.forEach(e=>{if(e.i===me.id)return;seen[e.i]=1;RM[e.i]=Object.assign(e,{t:performance.now()})});for(const k in RM)if(!seen[k])delete RM[k];itId=m.it;if(m.mp&&HOOK.remoteMap)HOOK.remoteMap(m.mp);if(m.sc)SCORE=m.sc;if(NET.mode=='inf'){INF={};(m.inf||[]).forEach(i=>INF[i]=1);iPh=m.ph||'wait';iRem=m.ir||0;iAt=performance.now()}}
 async function becomeHost(code,pub,mode){const m2=mode||'tag';NET.peer=await initPeer(NP+code+(m2=='tag'?'':sfx(m2)));NET.host=true;NET.pub=pub;NET.mode=m2;NET.code=code;me.id=NET.peer.id;hostListen()}
 const rc=()=>Array.from({length:5},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.random()*32|0]).join('');
 async function enter(mode,vr){
@@ -226,11 +239,11 @@ async function enter(mode,vr){
  let ok=false;const jm=mode=='quick'?'tag':vr,code=mode=='quick'?'':pickCode,rid=code+(mode=='quick'?'':sfx(jm));NET.mode=jm;
  try{
   if(mode=='quick'){st('Procurando sala pública…');NET.peer=await initPeer();let found=false;
-   for(let i=1;i<=6&&!found;i++){st('Procurando sala '+i+'…');found=await tryJoin('pub'+i,2500)}
+   for(let i=1;i<=6&&!found;i++){st('Procurando sala '+i+'…');found=await tryJoin('pub'+i,8000)}
    if(found){me.id=NET.peer.id;ok=true}
    else{NET.peer.destroy();NET.peer=null;for(let i=1;i<=6&&!ok;i++){try{await becomeHost('pub'+i,true);ok=true}catch(e){if(e!='unavailable-id')break}}}}
   else{st('Entrando na sala '+code+' ('+(jm=='inf'?'Infecção':'Casual')+')…');NET.peer=await initPeer();
-   if(await tryJoin(rid,4000)){me.id=NET.peer.id;ok=true}
+   if(await tryJoin(rid,10000)){me.id=NET.peer.id;ok=true}
    else{NET.peer.destroy();NET.peer=null;try{await becomeHost(code,false,jm);ok=true}catch(e){if(e=='unavailable-id'){st('Sala cheia. Tente outro código.');['qj','jn'].forEach(i=>$(i).disabled=false);HOOK.enterFail&&HOOK.enterFail();return}throw e}}}
  }catch(e){console.warn(e)}
  if(!ok){NET.peer=null;NET.host=true;NET.pub=mode=='quick';NET.mode=jm;NET.code=mode=='quick'?'OFFLINE':(code||'OFFLINE');me.id='me'}
@@ -261,7 +274,7 @@ function hudTick(now){const h=$('hud');if(NET.mode!='inf'){if(hudS){hudS='';h.st
  if(iPh=='wait')a='ESPERANDO JOGADORES';else if(iPh=='cd')a='INFECÇÃO COMEÇA EM '+sec;else if(iPh=='over')a='TODOS INFECTADOS · NOVA RODADA EM '+sec;else a=INF[me.id]?'VOCÊ ESTÁ INFECTADO · ESPALHE':'CORRA · NÃO SEJA INFECTADO';
  const t=a+'<small>SALA '+NET.code+' · INFECÇÃO · '+tot+' INFECTADOS</small>';if(t!==hudS){hudS=t;h.innerHTML=t;h.style.display='block';HOOK.hud&&HOOK.hud(t)}}
 function hostTick(dt,now){
- const pl2=[{id:me.id,x:P.x,y:P.y-.5,z:P.z}];for(const k in RM)if(!RM[k].b){if(now-RM[k].t>6000){delete RM[k];continue}pl2.push({id:k,x:RM[k].x,y:RM[k].y-.5,z:RM[k].z})}
+ const pl2=[{id:me.id,x:P.x,y:P.y-.5,z:P.z}];for(const k in RM)if(!RM[k].b){if(now-RM[k].t>6000){delete RM[k];try{NET.conns[k]&&NET.conns[k].close()}catch(e){}delete NET.conns[k];continue}pl2.push({id:k,x:RM[k].x,y:RM[k].y-.5,z:RM[k].z})}
  const all=pl2.concat(bots.map(b=>({id:b.id,x:b.x,y:b.y+.6,z:b.z})));
  if(NET.mode=='cas'){itId=null;return}
   if(NET.mode=='inf'){infTick(all,now);return}
@@ -353,7 +366,7 @@ function frame(t){if(!R.xr.isPresenting&&!(HOOK.ownLoop&&HOOK.ownLoop()))request
    
    if(HOOK.move){const mv=HOOK.move(fw,rt,grounded);fx+=mv.x;fz+=mv.z;if(mv.jump)jumpReq=true}
     const gpd=HOOK.padFilter?HOOK.padFilter(pad()):pad();if(gpd){const xs=gpd.mapping==='xr-standard',ax=(xs?gpd.axes[2]:gpd.axes[0])||0,ay=(xs?gpd.axes[3]:gpd.axes[1])||0;if(Math.abs(ax)>.15)fx+=ax;if(Math.abs(ay)>.15)fz-=ay;const pj=!!((gpd.buttons[0]&&gpd.buttons[0].pressed)||(xs&&gpd.buttons[4]&&gpd.buttons[4].pressed));if(pj&&!padJ)jumpReq=true;padJ=pj}
-   if(HOOK.inputLocked&&HOOK.inputLocked()){fx=0;fz=0;jumpReq=false}const ml=Math.hypot(fx,fz);if(ml>.05){const k=Math.min(1,ml)/ml,tx=(fw.x*fz+rt.x*fx)*k*3.8,tz=(fw.z*fz+rt.z*fx)*k*3.8,aa=1-Math.exp(-(grounded?9:2.5)*dt);vel.x+=(tx-vel.x)*aa;vel.z+=(tz-vel.z)*aa}
+   if(HOOK.inputLocked&&HOOK.inputLocked()){fx=0;fz=0;jumpReq=false}const ml=Math.hypot(fx,fz);if(ml>.05){const k=Math.min(1,ml)/ml,tx=(fw.x*fz+rt.x*fx)*k*3.8*TUNE.spd,tz=(fw.z*fz+rt.z*fx)*k*3.8*TUNE.spd,aa=1-Math.exp(-(grounded?9:2.5)*dt);vel.x+=(tx-vel.x)*aa;vel.z+=(tz-vel.z)*aa}
    if(jumpReq){jumpT=.15;jumpReq=false}jumpT-=dt;if(jumpT>0&&(grounded||gPrev)){vel.y=5.2*TUNE.jmp;jumpT=0}}
  {const f2=Math.exp(-(grounded?TUNE.fric:.25)*dt);vel.x*=f2;vel.z*=f2;const hs3=Math.hypot(vel.x,vel.z);if(hs3>TUNE.max){vel.x*=TUNE.max/hs3;vel.z*=TUNE.max/hs3}}
  if(P.y<floorMin){P.copy(spawnPos());vel.set(0,0,0);HOOK.respawned&&HOOK.respawned()}
