@@ -1,0 +1,57 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>MONKE GO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="MONKE GO — port do Gorilla Rush (Cardboard VR) para Oculus Go: Gorilla Locomotion, SoloPlay, Lava Run e Tag multiplayer.">
+<meta name="theme-color" content="#0b1410">
+<link rel="stylesheet" href="css/style.css">
+</head><body>
+<div id="bg"></div><canvas id="c"></canvas><div id="hud"></div>
+<div id="cam"><video id="v" playsinline muted></video><canvas id="ov"></canvas></div>
+<div id="lobby">
+<svg id="logo" viewBox="0 0 700 300" role="img" aria-label="MONKE GO"><text x="350" y="150" text-anchor="middle" font-family="GT,system-ui,sans-serif" font-size="150" fill="#3ddc84" stroke="#04210f" stroke-width="14" paint-order="stroke">MONKE</text><text x="350" y="275" text-anchor="middle" font-family="GT,system-ui,sans-serif" font-size="120" fill="#ffd54f" stroke="#3a2a00" stroke-width="12" paint-order="stroke">GO</text></svg>
+<div id="menu">
+<div class="tabs"><button class="tab on" data-t="play">JOGAR</button><button class="tab" data-t="style">ESTILO</button><button class="tab" data-t="set">AJUSTES</button></div>
+<section class="pane on" data-t="play"><h3>NOME</h3><input id="nick" maxlength="12" placeholder="Seu nome" autocomplete="off">
+<h3>MAPA</h3><select id="area"></select>
+<h3>MODO</h3><div class="modes">
+<button id="solo" class="big solo">SOLOPLAY</button>
+<button id="lava" class="big lava">LAVA RUN</button>
+<button id="qj" class="big">TAG · ENTRADA RÁPIDA</button></div>
+<div class="row2"><input id="code" maxlength="8" placeholder="CÓDIGO" autocapitalize="characters" style="text-transform:uppercase"><button id="jn" style="flex:0 0 auto">ENTRAR</button></div>
+<div class="hint">Código de sala: você escolhe Casual ou Infecção</div>
+<button id="vrgo" class="big" style="display:none">ENTRAR EM VR</button></section>
+<section class="pane" data-t="style"><h3>COR</h3><div class="row" id="sws"></div>
+<div class="row2"><span style="flex:1">Cor personalizada</span><input type="color" id="col" value="#ffffff"></div>
+<h3>ACESSÓRIOS</h3>
+<select id="accg"><option value="">Óculos: nenhum</option><option value="g_white">Óculos: White Circle</option></select>
+<select id="acch"><option value="">Cabeça: nada</option><option value="h_top">Cabeça: Cartola</option><option value="h_party">Cabeça: Chapéu de festa</option><option value="h_banana">Cabeça: Casca de banana</option><option value="h_penguin">Cabeça: Pinguim</option></select>
+<select id="accc"><option value="">Roupa: nenhuma</option><option value="c_hawaii">Roupa: Camisa havaiana</option></select>
+<h3>AJUSTE DO CHAPÉU</h3>
+<div class="row2"><span class="lb">Altura</span><input type="range" id="ahy" min="-8" max="8" step="0.5" value="0"></div>
+<div class="row2"><span class="lb">Frente</span><input type="range" id="ahz" min="-8" max="8" step="0.5" value="0"></div></section>
+<section class="pane" data-t="set"><h3>AJUSTES</h3>
+<select id="gfx"><option value="0" selected>Gráficos: Baixo</option><option value="1">Gráficos: Médio</option><option value="2">Gráficos: Alto</option></select>
+<select id="vr"><option value="auto" selected>Tela: Automático</option><option value="webxr">Tela: Headset (WebXR)</option><option value="webvr">Tela: Headset (WebVR 1.1)</option><option value="cardboard">Tela: VR Box / Cardboard (2 vistas)</option><option value="flat">Tela: Normal</option></select>
+<select id="mv"><option value="0">Mover: só mãos (Gorilla Tag)</option><option value="1" selected>Mover: mãos + tocar e segurar</option></select>
+<select id="ht"><option value="1">Rastreamento de mãos (câmera): Preciso</option><option value="0" selected>Rastreamento de mãos (câmera): Rápido</option></select>
+<h3>GORILLA LOCOMOTION</h3><div id="setx"></div>
+<div class="hint">Oculus Go: aponte o controle para o chão e gire o pulso para trás para empurrar. Gatilho = agarrar/escalar. Clique no touchpad = pular · bordas = girar · segurar = menu. Celular: mostre as mãos para a câmera.</div>
+<div class="hint small">Camisa havaiana: “Gorilla Tag Hawaiian T-shirt” por That-one-ripper (Sketchfab, CC BY 4.0). Demais créditos: README.</div></section>
+<div id="devinfo"></div>
+<div id="st">Carregando…</div></div></div>
+<div id="pick"><div class="pk"><h3 id="pkt">SALA</h3><button id="pkc" class="big">CASUAL</button><div class="sub">Só curtir · sem pegar</div><button id="pki" class="big">INFECÇÃO</button><div class="sub">Infectados passam para todo mundo</div><button id="pkx" style="background:#ffffff33;color:#fff">CANCELAR</button></div></div>
+<div id="pause"><div class="pk"><h3>PAUSADO</h3><div class="sub" id="pmsg"></div><button id="pvr" class="big">VOLTAR AO VR</button><button id="pflat" class="big">CONTINUAR NA TELA</button><button id="plobby" style="background:#ffffff33;color:#fff">LOBBY</button></div></div>
+<script src="lib/three.min.js"></script>
+<script src="lib/GLTFLoader.js"></script>
+<script src="lib/SkeletonUtils.js"></script>
+<!-- PeerJS 1.3.2 (ES5): a 1.5.x usa "?." e não carrega no navegador do Oculus Go -->
+<script src="lib/peerjs-1.3.2.min.js"></script>
+<script src="js/platform.js"></script>
+<script src="js/core.js"></script>
+<script src="js/vr.js"></script>
+<script src="js/input.js"></script>
+<script src="js/locomotion.js"></script>
+<script src="js/maps.js"></script>
+<script src="js/vrmenu.js"></script>
+<script src="js/modes.js"></script>
+<script src="js/main.js"></script>
+</body></html>

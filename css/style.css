@@ -1,0 +1,38 @@
+body,input,select,button,option,#hud,#st{text-transform:uppercase}input::placeholder{text-transform:uppercase}
+@font-face{font-family:GT;src:url(../assets/fonts/gt.otf)}
+:root{--bg:#0b1410;--fg:#eafff2;--ac:#3ddc84;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:GT,system-ui,sans-serif;overflow:hidden;touch-action:none}
+#bg{position:fixed;top:0;right:0;bottom:0;left:0;background:#0b1410 url(../assets/textures/lobby-bg.jpg) center/cover}
+#c{position:fixed;top:0;right:0;bottom:0;left:0;width:100%;height:100%}
+#cam{position:fixed;right:8px;bottom:8px;width:30vw;max-width:200px;overflow:hidden;display:none;background:#000}
+#cam video{width:100%;display:block}#cam.vr{opacity:.02;pointer-events:none;width:64px}#ov{position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%}
+#hud{position:fixed;top:calc(6px + env(safe-area-inset-top,0px));left:0;right:0;text-align:center;font-size:18px;text-shadow:0 1px 4px #000;display:none;pointer-events:none}
+#hud small{display:block;font-size:13px;opacity:.9}
+#lobby{position:fixed;top:0;right:0;bottom:0;left:0;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:linear-gradient(90deg,#000a,#0000 45%,#000a);overflow:auto}
+#logo{width:38vw;max-width:380px;align-self:flex-start}
+#menu{display:flex;flex-direction:column;gap:8px;width:46vw;max-width:340px;max-height:100%;overflow:auto;padding:10px;background:#000a;border-radius:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+.sw{width:30px;height:30px;border-radius:50%;border:3px solid #fff5}
+input,select{font-family:GT,system-ui,sans-serif;font-size:16px;padding:9px;border-radius:10px;border:2px solid var(--ac);background:#0b1410;color:var(--fg);min-width:0;width:100%;box-sizing:border-box}
+input[type=color]{width:44px;height:38px;padding:0;border:0;background:none}
+button{font-family:GT,system-ui,sans-serif;background:var(--ac);color:#04210f;border:0;border-radius:12px;padding:11px 14px;font-size:16px;flex:1}
+button:disabled{opacity:.5}#st{font-size:13px;text-align:center;opacity:.9;min-height:1.2em}
+section{display:flex;flex-direction:column;gap:7px;padding:10px;background:#ffffff14;border-radius:10px}h3{margin:0;font-size:12px;letter-spacing:3px;opacity:.7}
+.row2{display:flex;gap:7px;align-items:center}.big{padding:14px;font-size:19px}#menu button{flex:none;width:100%}#menu .row2 button{width:auto}
+@media (orientation:portrait){#lobby{flex-direction:column;justify-content:flex-start}#logo{width:70vw;align-self:center}#menu{width:92vw;margin-top:auto}}
+input[type=range]{padding:0;border:0;background:none;accent-color:var(--ac)}
+#menu .tabs{display:flex;gap:6px}#menu .tabs button{flex:1;width:auto;padding:9px 4px;font-size:14px;background:#ffffff1a;color:var(--fg)}#menu .tabs button.on{background:var(--ac);color:#04210f}
+.pane{display:none}.pane.on{display:flex}.hint{font-size:12px;opacity:.7;text-align:center}.hint.small{font-size:10px;opacity:.5}.lb{flex:0 0 64px;font-size:13px}
+#pick{position:fixed;top:0;right:0;bottom:0;left:0;display:none;align-items:center;justify-content:center;background:#000c;z-index:20;padding:10px}#pick.on{display:flex}.pk{display:flex;flex-direction:column;gap:8px;width:86vw;max-width:340px;padding:14px;background:#0b1410;border:2px solid var(--ac);border-radius:14px;text-align:center}.pk button{width:100%;flex:none}.pk .sub{font-size:12px;opacity:.75;margin-top:-4px}
+/* ---- MONKE GO ---- */
+/* Chromium do Oculus Go (7x) não tem `gap` em flexbox: margens de reserva */
+#menu>*+*,section>*+*{margin-top:7px}.row2>*+*{margin-left:7px}
+#logo{filter:drop-shadow(0 4px 10px #000a)}
+.modes{display:flex;flex-direction:column}
+.modes button.lava{background:#ff7043;color:#fff}
+.modes button.solo{background:#ffd54f;color:#3a2a00}
+#vrgo{background:#7c4dff;color:#fff}
+#devinfo{font-size:11px;opacity:.65;text-align:center;text-transform:none}
+#pause{position:fixed;top:0;right:0;bottom:0;left:0;display:none;align-items:center;justify-content:center;background:#000c;z-index:30}
+#pause.on{display:flex}
+#pause .pk button{margin-top:8px}
