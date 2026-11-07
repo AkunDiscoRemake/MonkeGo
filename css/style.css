@@ -24,7 +24,7 @@ input[type=range]{padding:0;border:0;background:none;accent-color:var(--ac)}
 #menu .tabs{display:flex;gap:6px}#menu .tabs button{flex:1;width:auto;padding:9px 4px;font-size:14px;background:#ffffff1a;color:var(--fg)}#menu .tabs button.on{background:var(--ac);color:#04210f}
 .pane{display:none}.pane.on{display:flex}.hint{font-size:12px;opacity:.7;text-align:center}.hint.small{font-size:10px;opacity:.5}.lb{flex:0 0 64px;font-size:13px}
 #pick{position:fixed;top:0;right:0;bottom:0;left:0;display:none;align-items:center;justify-content:center;background:#000c;z-index:20;padding:10px}#pick.on{display:flex}.pk{display:flex;flex-direction:column;gap:8px;width:86vw;max-width:340px;padding:14px;background:#0b1410;border:2px solid var(--ac);border-radius:14px;text-align:center}.pk button{width:100%;flex:none}.pk .sub{font-size:12px;opacity:.75;margin-top:-4px}
-/* ---- MONKE GO ---- */
+/* ---- Gorilla Rush · Oculus Go ---- */
 /* Chromium do Oculus Go (7x) não tem `gap` em flexbox: margens de reserva */
 #menu>*+*,section>*+*{margin-top:7px}.row2>*+*{margin-left:7px}
 #logo{filter:drop-shadow(0 4px 10px #000a)}
@@ -36,3 +36,4 @@ input[type=range]{padding:0;border:0;background:none;accent-color:var(--ac)}
 #pause{position:fixed;top:0;right:0;bottom:0;left:0;display:none;align-items:center;justify-content:center;background:#000c;z-index:30}
 #pause.on{display:flex}
 #pause .pk button{margin-top:8px}
+#credits{font-size:12px;text-align:center;letter-spacing:1px;color:#ffd54f}#credits b{color:#3ddc84}

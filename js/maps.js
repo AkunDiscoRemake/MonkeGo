@@ -1,4 +1,4 @@
-// MONKE GO — mapas. Usa APENAS o mapa que veio na source original (assets/maps/park.bin).
+// Gorilla Rush (Oculus Go) — mapas. Usa APENAS o mapa que veio na source original (assets/maps/park.bin).
 // O mapa original contém várias áreas; o "seletor de mapas" leva o jogador a cada uma delas.
 // Áreas sem conteúdo correspondente no mapa original (City, Beach, Clouds, Basement, Bayou) NÃO
 // são listadas — não há botões falsos (ver README, "Limitações").
@@ -13,7 +13,7 @@ const MAPS=(function(){
   const M={cur:'forest',loaded:false};
   // Áreas (coordenadas tiradas da geometria do mapa original; ver README)
   M.list=[
-    {id:'forest',name:'Floresta',desc:'Clareira-lobby com o quadro MONKE GO, toco e casa na árvore',at:[-2,16],r:1.2,top:40,board:[-3.4,13.2]},
+    {id:'forest',name:'Floresta',desc:'Clareira-lobby com o quadro Gorilla Rush, toco e casa na árvore',at:[-2,16],r:1.2,top:40,board:[-3.4,13.2]},
     {id:'canyons',name:'Cânions',desc:'Paredões, cactos e almofadas gigantes',at:[3,-47],r:9,top:30},
     {id:'caves',name:'Cavernas',desc:'Cristais e carrinhos de mina no subsolo',at:[10,17],r:6,top:-6,cave:true},
     {id:'mountains',name:'Montanhas',desc:'Penhasco rochoso com rota de escalada (spawn de novato original)',spawn:[59.32,17.21,-23.61]},
@@ -37,7 +37,7 @@ const MAPS=(function(){
   M.load=async()=>{M.cur=byId(SETTINGS.map).id;await loadParkMap();M.loaded=true;
     // limites verticais (para o Lava Run)
     const b=new THREE.Box3();mapMeshes.forEach(m=>{m.geometry.computeBoundingBox();b.union(m.geometry.boundingBox)});M.minY=b.min.y;M.maxY=b.max.y;
-    // quadro MONKE GO na clareira-lobby da Floresta, de frente para quem chega
+    // quadro Gorilla Rush na clareira-lobby da Floresta, de frente para quem chega
     const f=byId('forest'),g=hit(V3(f.board[0],40,f.board[1]),DOWN,60);MONKE.placeBoard(f.board[0],(g?g.point.y:1.9)+2.6,f.board[1],Math.atan2(f.at[0]-f.board[0],f.at[1]-f.board[1]))};
   // multiplayer: cada jogador nasce num ponto diferente ao redor do spawn (senão o pegador/infectado
   // encosta em todos no mesmo instante)

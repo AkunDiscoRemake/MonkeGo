@@ -1,11 +1,21 @@
-# MONKE GO
+# Gorilla Rush — versão Oculus Go
 
-Port do **Gorilla Rush** (jogo original para Google Cardboard, em `original/`) para o **Oculus Go**,
-em HTML + CSS + JavaScript puro, pronto para GitHub Pages.
+**Gorilla Rush** é um jogo criado por **WelliDev**. Este repositório é a versão para **Oculus Go**,
+feita a partir do código original dele (o HTML original para Google Cardboard está intacto em `original/`),
+em HTML + CSS + JavaScript puro, pronta para GitHub Pages.
 
 > O jogo original foi preservado: mesmo modelo de macaco (sem pernas), mesmo mapa, mesma física de
 > colisão, mesmos acessórios, sons, multiplayer PeerJS (Tag / Casual / Infecção) e o modo Cardboard com
-> rastreamento de mãos pela câmera. O port acrescenta o caminho do Oculus Go por cima disso.
+> rastreamento de mãos pela câmera. A versão Oculus Go acrescenta o suporte ao headset por cima disso.
+
+## Créditos
+
+- **Gorilla Rush** — criado por **WelliDev** (jogo, mapa, modelo, acessórios, sons e multiplayer originais).
+- Camisa havaiana: “Gorilla Tag Hawaiian T-shirt” por That-one-ripper (Sketchfab, CC BY 4.0).
+- Músicas (CC0): *Chill Lofi Inspired* e *Lofi Hip Hop* por omfgdude; *Napping On A Cloud* por congusbongus (OpenGameArt).
+- Bibliotecas: three.js r128 (MIT), PeerJS (MIT), MediaPipe Hands (Apache 2.0).
+
+Os créditos também aparecem no lobby, no quadro do mundo 3D e no menu VR (*Créditos*).
 
 ## Como jogar
 
@@ -52,12 +62,12 @@ espere 1,5 s (ou toque na tela). O toque continua sendo o pulo, como no original
   gravidade, atrito, sensibilidade, assistência, comprimento dos braços, qualidade gráfica, mão do
   controle, giro, nomes. Valores ficam salvos no navegador.
 
-## Identidade MONKE
+## Identidade da versão Oculus Go
 
 - **Estilos do macaco** (aba ESTILO / menu VR): *Monke* (pelagem marrom e rosto escuro, inspirado no
   Gorilla Tag — padrão), *Baboon* (cinza-oliva e rosto rosado, inspirado no Scary Baboon) e *Original*.
   Braços mais longos por padrão (1,32×). Cor e estilo ficam salvos e são enviados aos outros jogadores.
-- **Clareira-lobby** na Floresta com o **quadro MONKE GO** no mundo: modo, sala, lista de monkes com
+- **Clareira-lobby** na Floresta com o **quadro Gorilla Rush** no mundo: modo, sala, lista de monkes com
   status (pegador/infectado) e tags, como jogar e a música atual.
 - **Tag como nos fan games**: quem é pego congela ~1 s (tag freeze), ouve o som de tag e recebe a skin de
   lava; o pegador/infectado fica um pouco mais rápido (+15 %).
@@ -73,7 +83,7 @@ espere 1,5 s (ou toque na tela). O toque continua sendo o pulo, como no original
   **placar** (menu VR → Placar: quem está com o pegador/infectado e quantos tags cada um fez).
   Como o multiplayer já existia, **não foi usado Supabase** (não há SQL a configurar).
   Usa os **servidores originais** do Gorilla Rush (ver abaixo) e o mesmo prefixo de sala `grush-`:
-  jogadores do MONKE GO e do Gorilla Rush original entram nas mesmas salas.
+  jogadores da versão Oculus Go e do Gorilla Rush original entram nas mesmas salas.
 
 ### O que foi corrigido para o multiplayer funcionar de verdade
 
@@ -81,7 +91,7 @@ espere 1,5 s (ou toque na tela). O toque continua sendo o pulo, como no original
   PeerJS 1.5.4 (STUN `stun.l.google.com:19302` + TURN `eu-0`/`us-0.turn.peerjs.com:3478`), exatamente
   como no código-fonte. O navegador carrega o **PeerJS 1.5.4** (mesma versão do original); só no Oculus
   Go, cujo Chromium 77 não executa o 1.5.4, carrega o 1.3.2 configurado com esses mesmos servidores.
-  Compatibilidade testada nos dois sentidos (host/cliente): original ↔ MONKE GO 1.5.4 ↔ MONKE GO 1.3.2 (Go).
+  Compatibilidade testada nos dois sentidos (host/cliente): original ↔ versão Oculus Go com 1.5.4 ↔ com 1.3.2 (Go).
 - **Timeouts**: entrar numa sala esperava só 2,5 s; pela internet a conexão demora mais e cada jogador
   acabava criando a própria sala. Agora 8–10 s (salas inexistentes continuam sendo descartadas na hora).
 - **Spawn espalhado** no online: antes todos nasciam no mesmo ponto e a Infecção acabava na hora.
@@ -115,7 +125,7 @@ existem nele (coordenadas extraídas da geometria do próprio mapa):
 
 | Área | Onde fica no mapa original |
 |---|---|
-| Floresta | clareira-lobby com o quadro MONKE GO, toco, árvores e casa na árvore |
+| Floresta | clareira-lobby com o quadro Gorilla Rush, toco, árvores e casa na árvore |
 | Cânions | paredões `canyon*`, cactos e almofadas gigantes (z ≈ −50) |
 | Cavernas | subsolo com cristais, caixas e carrinhos de mina (y ≈ −14) |
 | Montanhas | penhasco rochoso alto com setas de escalada (spawn de novato original) |

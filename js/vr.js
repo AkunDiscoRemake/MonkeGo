@@ -1,4 +1,4 @@
-// MONKE GO — camada de apresentação VR.
+// Gorilla Rush (Oculus Go) — camada de apresentação VR.
 //  • WebXR  (Oculus Browser 7+ quando disponível): usa o WebXRManager do three r128 (R.xr).
 //  • WebVR 1.1 (Oculus Browser 5/6 no Go, e Go sem WebXR): implementação própria — o three r128 não
 //    suporta mais WebVR, então aqui fazemos requestPresent, VRFrameData, projeção/visão por olho e submitFrame.

@@ -1,4 +1,4 @@
-// MONKE GO — modos de jogo.
+// Gorilla Rush (Oculus Go) — modos de jogo.
 //  • SoloPlay: offline, sem bots, explorar/escalar livremente (enter('solo') no núcleo).
 //  • Lava Run: offline; lava (textura de lava ORIGINAL do jogo) sobe progressivamente; pontos = tempo vivo.
 //  • Tag / Infecção / Casual: multiplayer ORIGINAL (PeerJS) preservado; aqui só placar e troca de modo.

@@ -1,4 +1,4 @@
-// MONKE GO — sistema de entrada CENTRALIZADO.
+// Gorilla Rush (Oculus Go) — sistema de entrada CENTRALIZADO.
 // Todas as fontes (controle Oculus Go via WebVR ou WebXR, gamepad comum, teclado, toque/Cardboard, olhar)
 // são lidas aqui uma vez por quadro e convertidas em: estado contínuo (orientação do controle, gatilho,
 // touchpad) + AÇÕES discretas roteadas para o contexto ativo ('game' ou 'menu'). Assim um mesmo botão

@@ -1,4 +1,4 @@
-// MONKE GO — boot, lobby 2D e ligação entre módulos.
+// Gorilla Rush (Oculus Go) — boot, lobby 2D e ligação entre módulos.
 'use strict';
 // MediaPipe Hands (rastreamento de mãos pela câmera, modo Cardboard ORIGINAL) — carregado só quando usado.
 // No Oculus Go nunca é baixado (não há câmera acessível ao navegador).

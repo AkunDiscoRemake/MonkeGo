@@ -1,4 +1,4 @@
-// MONKE GO — detecção de dispositivo/capacidades + configurações persistentes.
+// Gorilla Rush (Oculus Go) — detecção de dispositivo/capacidades + configurações persistentes.
 // Carregado ANTES de core.js (não depende de THREE).
 'use strict';
 const PLATFORM=(function(){

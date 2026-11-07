@@ -1,4 +1,4 @@
-// MONKE GO — identidade "monke": estilos do macaco (Monke / Baboon), quadro do lobby no mundo 3D e
+// Gorilla Rush (Oculus Go) — identidade da versão Oculus Go: estilos do macaco (Monke / Baboon), quadro do lobby no mundo 3D e
 // mecânicas de tag no estilo dos fan games de macaco (tag freeze, som de tag, pegador mais rápido).
 'use strict';
 const MONKE=(function(){
@@ -19,7 +19,7 @@ const MONKE=(function(){
   K.onPlayer=()=>{mats.monkeStyle=SETTINGS.style;setColor(SETTINGS.color)};
   HOOK.style=()=>SETTINGS.style;
 
-  // ---------- quadro MONKE GO no mundo (ao lado do toco / computador do mapa original) ----------
+  // ---------- quadro Gorilla Rush no mundo (ao lado do toco / computador do mapa original) ----------
   const W=1024,H=640,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
   const tex=new THREE.CanvasTexture(c);tex.encoding=THREE.sRGBEncoding;tex.anisotropy=4;
   const board=new THREE.Group();
@@ -34,15 +34,15 @@ const MONKE=(function(){
     const rows=MODES.scoreLines(),online=!!NET.peer;
     const s=[MODES.cur,NET.code,online,rows.map(r=>r.n+r.st+r.sc).join(','),MUSIC.now()].join('|');if(s===sig)return;sig=s;
     x.fillStyle='#0b1410';x.fillRect(0,0,W,H);x.strokeStyle='#3ddc84';x.lineWidth=10;x.strokeRect(5,5,W-10,H-10);
-    x.textBaseline='middle';x.textAlign='left';x.fillStyle='#3ddc84';x.font=FONT(86);x.fillText('MONKE',40,72);x.fillStyle='#ffd54f';x.fillText('GO',400,72);
-    x.fillStyle='#eafff2';x.font=FONT(24);x.fillText('GORILLA LOCOMOTION NO OCULUS GO',560,58);x.globalAlpha=.7;x.font=FONT(18);x.fillText('PORT DO GORILLA RUSH',560,88);x.globalAlpha=1;
+    x.textBaseline='middle';x.textAlign='left';x.fillStyle='#3ddc84';x.font=FONT(70);x.fillText('GORILLA',40,72);x.fillStyle='#ffd54f';x.fillText('RUSH',372,72);
+    x.fillStyle='#eafff2';x.font=FONT(24);x.fillText('CRIADO POR WELLIDEV',620,58);x.globalAlpha=.7;x.font=FONT(18);x.fillText('VERSÃO OCULUS GO',620,88);x.globalAlpha=1;
     x.fillStyle='#ffffff18';x.fillRect(30,130,W-60,3);
     x.fillStyle='#3ddc84';x.font=FONT(28);x.fillText('MODO: '+MODES.label().toUpperCase(),40,170);
-    x.fillStyle='#eafff2';x.font=FONT(22);x.fillText(online?('SALA '+NET.code+' · '+rows.length+(rows.length>1?' MONKES':' MONKE')):'OFFLINE',40,206);
+    x.fillStyle='#eafff2';x.font=FONT(22);x.fillText(online?('SALA '+NET.code+' · '+rows.length+(rows.length>1?' JOGADORES':' JOGADOR')):'OFFLINE',40,206);
     x.font=FONT(24);rows.slice(0,8).forEach((r,k)=>{const y=250+k*38;x.fillStyle=r.st=='PEGADOR'||r.st=='INFECTADO'?'#ff7043':'#eafff2';
       x.fillText((k+1)+'. '+r.n.toUpperCase().slice(0,18),40,y);x.textAlign='right';x.fillText((r.st?r.st.toUpperCase()+'  ':'')+r.sc,520,y);x.textAlign='left'});
     x.fillStyle='#ffd54f';x.font=FONT(26);x.fillText('COMO JOGAR',580,170);x.fillStyle='#eafff2';x.font=FONT(19);
-    ['APONTE PARA O CHÃO E PUXE O PULSO','PARA TRÁS: EMPURRA COMO MONKE','AS MÃOS SE REVEZAM SOZINHAS','GATILHO: AGARRAR / ESCALAR','TOUCHPAD: PULAR · BORDAS: GIRAR','SEGURAR TOUCHPAD: MENU'].forEach((t,k)=>x.fillText(t,580,212+k*36));
+    ['APONTE PARA O CHÃO E PUXE O PULSO','PARA TRÁS: EMPURRA COMO GORILA','AS MÃOS SE REVEZAM SOZINHAS','GATILHO: AGARRAR / ESCALAR','TOUCHPAD: PULAR · BORDAS: GIRAR','SEGURAR TOUCHPAD: MENU'].forEach((t,k)=>x.fillText(t,580,212+k*36));
     x.globalAlpha=.75;x.font=FONT(17);x.fillText('♪ '+MUSIC.now().toUpperCase().slice(0,44),580,450);x.globalAlpha=1;
     x.fillStyle='#ffffff18';x.fillRect(30,H-80,W-60,3);x.fillStyle='#eafff2';x.font=FONT(20);x.textAlign='center';
     x.fillText(NET.mode=='inf'?'INFECÇÃO: QUEM É PEGO VIRA PEGADOR TAMBÉM':NET.mode=='tag'?'TAG: ENCOSTE NO OUTRO MONKE PARA PASSAR O PEGADOR':'EXPLORE, ESCALE E PULE ENTRE AS ÁRVORES',W/2,H-42);

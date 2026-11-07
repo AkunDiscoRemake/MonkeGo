@@ -1,4 +1,4 @@
-// MONKE GO — Gorilla Locomotion híbrido para UM controle 3DoF (Oculus Go).
+// Gorilla Rush (Oculus Go) — Gorilla Locomotion híbrido para UM controle 3DoF (Oculus Go).
 // O núcleo original já move o macaco quando a mão encosta numa superfície e é empurrada (para trás/baixo).
 // Aqui geramos as posições das mãos a partir do controle 3DoF:
 //  • Mão real: modelo de braço — ombro fixo no corpo + direção do controle (amplificada pela sensibilidade).

@@ -1,4 +1,4 @@
-// MONKE GO — música chill de fundo (faixas CC0 do OpenGameArt, ver README/créditos).
+// Gorilla Rush (Oculus Go) — música chill de fundo (faixas CC0 do OpenGameArt, ver README/créditos).
 // Usa <audio> com streaming (não decodifica a faixa inteira na memória do Go) e só baixa a faixa que vai tocar.
 // Começa no primeiro gesto do usuário (política de autoplay dos navegadores).
 'use strict';

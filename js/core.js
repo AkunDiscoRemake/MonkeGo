@@ -1,6 +1,6 @@
-// MONKE GO — núcleo original do Gorilla Rush (Cardboard), adaptado. Assets agora são arquivos em assets/ (antes base64 embutido).
+// Gorilla Rush (Oculus Go) — núcleo original do Gorilla Rush (Cardboard), adaptado. Assets agora são arquivos em assets/ (antes base64 embutido).
 const ASSET='assets/';
-// HOOK: pontos de extensão usados pelos módulos MONKE GO (vr.js, input.js, locomotion.js, modes.js, vrmenu.js). Vazio = comportamento original.
+// HOOK: pontos de extensão usados pelos módulos da versão Oculus Go (vr.js, input.js, locomotion.js, modes.js, vrmenu.js). Vazio = comportamento original.
 const HOOK={};let SCORE={};
 function toast(t,ms){if(HOOK.toast&&HOOK.toast(t,ms))return;const d=document.createElement('div');d.textContent=t;d.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99;background:#000a;color:#fff;padding:8px;border-radius:8px;font:13px sans-serif;text-align:center';document.body.appendChild(d);setTimeout(()=>d.remove(),ms||5000)}
 const $=id=>document.getElementById(id),V3=(x,y,z)=>new THREE.Vector3(x,y,z),st=t=>$('st').textContent=t;
@@ -201,7 +201,7 @@ const SURF=n=>/metal|bronze/.test(n)?2:/bark|log|brown|panel|picnic|crate|cart|k
 let AC=null;const SB=[null,null,null,null],SNDK=['grass','wood','metal','stone'],lastSnd=[0,0];let lastCls=0,gCls=0,gPrev=false,assist=1;
 function initAudio(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();SNDK.forEach((k,i)=>{fetch(ASSET+'sounds/'+SND_FILES[k]+'.mp3').then(r=>r.arrayBuffer()).then(ab=>AC.decodeAudioData(ab,b=>{SB[i]=b},()=>{})).catch(()=>{})});HOOK.audio&&HOOK.audio(AC)}catch(e){AC=null}}
 function tapSound(hand,cls,vol){if(!AC||!SB[cls])return;const n=performance.now();if(n-lastSnd[hand]<90)return;lastSnd[hand]=n;if(AC.state=='suspended')AC.resume();const s=AC.createBufferSource(),g=AC.createGain();s.buffer=SB[cls];s.playbackRate.value=.93+Math.random()*.14;g.gain.value=Math.max(.2,Math.min(1,vol));s.connect(g);g.connect(AC.destination);s.start()}
-const NP='grush-'; // prefixo ORIGINAL: MONKE GO entra nas mesmas salas do Gorilla Rush
+const NP='grush-'; // prefixo ORIGINAL: a versão Oculus Go entra nas mesmas salas do Gorilla Rush
 let INF={},iPh='wait',iEnd=0,iRem=0,iAt=0,REMI=0,pickCode='',hudS='';
 const isIt=id=>NET.mode=='inf'?!!INF[id]:id===itId;
 function sfx(v){return v=='inf'?'-I':'-C'}
@@ -224,9 +224,9 @@ function netData(m){if(m.t!='s')return;NET.lastS=performance.now();const seen={}
 async function becomeHost(code,pub,mode){const m2=mode||'tag';NET.peer=await initPeer(NP+code+(m2=='tag'?'':sfx(m2)));NET.host=true;NET.pub=pub;NET.mode=m2;NET.code=code;me.id=NET.peer.id;hostListen()}
 const rc=()=>Array.from({length:5},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.random()*32|0]).join('');
 async function enter(mode,vr){
- initAudio();me.nick=($('nick').value.trim()||'Monke').slice(0,12);try{localStorage.setItem('gr_nick',me.nick)}catch(e){}
+ initAudio();me.nick=($('nick').value.trim()||'Gorilla').slice(0,12);try{localStorage.setItem('gr_nick',me.nick)}catch(e){}
  if(HOOK.enter)HOOK.enter(mode,vr);
- // MONKE GO: modos offline (SoloPlay / Lava Run) — sem rede, sem bots
+ // Gorilla Rush (Oculus Go): modos offline (SoloPlay / Lava Run) — sem rede, sem bots
  if(mode=='solo'||mode=='lava'){NET.peer=null;NET.hc=null;NET.conns={};NET.host=true;NET.pub=false;NET.mode='cas';NET.code=mode=='lava'?'LAVA':'SOLO';me.id='me';startGame();return}
  ['qj','jn'].forEach(i=>$(i).disabled=true);
  try{if(window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission)await DeviceOrientationEvent.requestPermission()}catch(e){}
@@ -316,7 +316,7 @@ let isNewbie=true;try{isNewbie=!localStorage.getItem('gr_played')}catch(e){}
 const WR=.14,_wd=[],_wn=V3(),_upv=V3(0,1,0);for(let i=0;i<8;i++){const a=i*Math.PI/4;_wd.push(V3(Math.cos(a),0,Math.sin(a)))}
 function wallFix(){for(const hy of [-.65,-.2,.15])for(let i=0;i<8;i++){const d=_wd[i],h=hit(V3(P.x,P.y+hy,P.z),d,WR);if(h){_wn.copy(h.n);_wn.y=0;if(_wn.lengthSq()<1e-4)_wn.copy(d).negate();_wn.normalize();if(_wn.dot(d)>0)_wn.negate();P.addScaledVector(_wn,WR-h.distance);const k=vel.dot(_wn);if(k<0)vel.addScaledVector(_wn,-k)}}
  const c=hit(P,_upv,.2);if(c){P.y-=.2-c.distance;if(vel.y>0)vel.y=0}}
-// MONKE GO: colisão contínua vertical — impede atravessar o chão com impulsos fortes / quadros longos
+// Gorilla Rush (Oculus Go): colisão contínua vertical — impede atravessar o chão com impulsos fortes / quadros longos
 const _gs=V3();function groundSweep(y0){if(P.y>=y0)return;const top=Math.max(y0,P.y)+.3,h=hit(_gs.set(P.x,top,P.z),DOWN,top-(P.y-1.1)+.05);if(h&&h.n.y>.3&&P.y-1.1<h.point.y){P.y=h.point.y+1.1;if(vel.y<0)vel.y=0}}
 function spawnPos(){if(HOOK.spawn){const s=HOOK.spawn();if(s)return s}return isNewbie?V3(59.32,17.21,-23.61):V3(3.60,6.30,-6.49)}
 const _er=V3(),touch=[false,false],_hd=V3(),_ro=V3();

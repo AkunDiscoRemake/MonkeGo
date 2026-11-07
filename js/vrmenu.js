@@ -1,4 +1,4 @@
-// MONKE GO — HUD 3D e menu VR acessível durante a partida.
+// Gorilla Rush (Oculus Go) — HUD 3D e menu VR acessível durante a partida.
 // Interação: laser do controle + gatilho/clique do touchpad; swipe no touchpad navega; esquerda/direita
 // ajusta valores. Sem controle (Cardboard): olhar + permanecer 1,5 s (ou tocar na tela). Desktop: mouse/teclado.
 // Abrir/fechar: segurar o touchpad (0,6 s) · botão Voltar do navegador · Esc/M · Cardboard: olhar para cima 1,5 s.
@@ -38,7 +38,7 @@ const VRMENU=(function(){
   const set=(k,v)=>{SETTINGS[k]=v;SETTINGS.save();applySettings(k)};
   function pages(){
     const P2={};
-    P2.main={t:'MONKE GO',items:[
+    P2.main={t:'GORILLA RUSH',items:[
       {l:'Voltar ao jogo',a:close},
       {l:'Modos',sub:MODES.label(),a:()=>go('modes')},
       {l:'Mapas',sub:MAPS.byId(MAPS.cur).name,a:()=>go('maps')},
@@ -47,6 +47,7 @@ const VRMENU=(function(){
       {l:'Estilo do macaco',sub:'◀ ▶ Monke / Baboon / Original',val:()=>MONKE.STY[SETTINGS.style].n,adj:d=>{const k=Object.keys(MONKE.STY);let i=k.indexOf(SETTINGS.style);i=(i+d+k.length)%k.length;MONKE.setStyle(k[i])}},
       {l:'Cor do macaco',sub:'◀ ▶',adj:d=>{let i=COLORS.indexOf(color);i=(i+d+COLORS.length)%COLORS.length;setColor(COLORS[i])},swatch:()=>color},
       {l:'Música',sub:MUSIC.now(),val:()=>SETTINGS.music<=0?'DESLIGADA':Math.round(SETTINGS.music*100)+'%',adj:d=>set('music',Math.max(0,Math.min(1,+(SETTINGS.music+d*.1).toFixed(2)))),a:()=>{MUSIC.start();MUSIC.next();M.dirty=true}},
+      {l:'Créditos',sub:'Gorilla Rush por WelliDev',a:()=>toast('GORILLA RUSH — criado por WelliDev · Versão Oculus Go baseada no código original · Músicas CC0: omfgdude, congusbongus',7000)},
       {l:'Recentralizar giro',a:()=>{VRP.setYaw(0);yw=0;toast('Giro recentralizado',1500)}},
       {l:'Dispositivo',sub:PLATFORM.isGo?'Oculus Go':VRP.mode.toUpperCase(),a:()=>toast(PLATFORM.describe()+' · modo '+VRP.mode,6000)},
     ]};
