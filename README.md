@@ -55,13 +55,16 @@ espere 1,5 s (ou toque na tela). O toque continua sendo o pulo, como no original
   ou sala por código (Casual / Infecção). Sincronização, tag, infecção, nomes sobre os jogadores e
   **placar** (menu VR → Placar: quem está com o pegador/infectado e quantos tags cada um fez).
   Como o multiplayer já existia, **não foi usado Supabase** (não há SQL a configurar).
-  As salas usam o prefixo `monkego-` e PeerJS 1.3.2 (ver Limitações).
+  Usa os **servidores originais** do Gorilla Rush (ver abaixo) e o mesmo prefixo de sala `grush-`:
+  jogadores do MONKE GO e do Gorilla Rush original entram nas mesmas salas.
 
 ### O que foi corrigido para o multiplayer funcionar de verdade
 
-- **TURN**: o TURN padrão do PeerJS não é confiável; agora usa STUN do Google + TURN público
-  *Open Relay* (metered.ca) com credenciais temporárias geradas no navegador (HMAC-SHA1, padrão coturn),
-  então jogadores em 4G/NAT restritivo conseguem conectar.
+- **Servidores originais**: sinalização no servidor público PeerJS (`0.peerjs.com`) e ICE padrão do
+  PeerJS 1.5.4 (STUN `stun.l.google.com:19302` + TURN `eu-0`/`us-0.turn.peerjs.com:3478`), exatamente
+  como no código-fonte. O navegador carrega o **PeerJS 1.5.4** (mesma versão do original); só no Oculus
+  Go, cujo Chromium 77 não executa o 1.5.4, carrega o 1.3.2 configurado com esses mesmos servidores.
+  Compatibilidade testada nos dois sentidos (host/cliente): original ↔ MONKE GO 1.5.4 ↔ MONKE GO 1.3.2 (Go).
 - **Timeouts**: entrar numa sala esperava só 2,5 s; pela internet a conexão demora mais e cada jogador
   acabava criando a própria sala. Agora 8–10 s (salas inexistentes continuam sendo descartadas na hora).
 - **Spawn espalhado** no online: antes todos nasciam no mesmo ponto e a Infecção acabava na hora.
@@ -110,7 +113,7 @@ O navegador do Go (Oculus Browser, Chromium 7x) **não** tem várias APIs que o 
 | Problema no original | Solução |
 |---|---|
 | `DecompressionStream` (Chrome 80+) para abrir o mapa | mapa servido também descompactado (`park.bin`); `.gz` só quando a API existe |
-| PeerJS 1.5.4 usa `?.` (erro de sintaxe no Chromium 77) | PeerJS 1.3.2 (ES5) |
+| PeerJS 1.5.4 usa `?.` (erro de sintaxe no Chromium 77) | 1.5.4 onde roda; 1.3.2 (ES5) só no Go, com os mesmos servidores — interopera com o original |
 | CSS `inset`, `min()` e `gap` em flexbox | propriedades equivalentes |
 | WebXR pode não existir no Go | detecção real: **WebXR** (`isSessionSupported`) → **WebVR 1.1** (`getVRDisplays`) → Cardboard → tela |
 | three.js r128 não tem mais WebVR | renderizador WebVR 1.1 próprio em `js/vr.js`: `requestPresent`, `VRFrameData`, projeção/visão por olho, `submitFrame`, pose reamostrada logo antes de desenhar (menor latência) |
@@ -138,11 +141,9 @@ escalada) e no modo celular/Cardboard. **Não foi testado em um Oculus Go físic
 - **Botão Voltar dentro do VR** é reservado pelo sistema; ele encerra o VR (o jogo pausa e oferece voltar).
 - **Texturas comprimidas** (ETC/ASTC/Basis): não usadas — exigiriam reconverter os assets originais e um
   transcoder; as texturas do jogo já são pequenas (JPEG/PNG ≤ 256 px no mapa).
-- **Multiplayer** depende do servidor público PeerJS (0.peerjs.com) e de conexões P2P (WebRTC); redes com
-  NAT restritivo podem falhar. Salas MONKE GO não se misturam com as do Gorilla Rush original.
+- **Multiplayer** depende dos servidores públicos do PeerJS (os mesmos do original) e de conexões P2P
+  (WebRTC); se o TURN do PeerJS estiver fora do ar, redes com NAT muito restritivo podem não conectar.
 - **Áudio/música** só iniciam após um toque/clique (política dos navegadores).
-- O TURN *Open Relay* é um serviço gratuito de terceiros, sem garantia de disponibilidade; se cair,
-  conexões entre redes muito restritivas podem falhar (redes comuns funcionam só com STUN).
 - A origem dos modelos do mapa e do macaco é a da source original; a camisa havaiana é CC BY 4.0
   (“Gorilla Tag Hawaiian T-shirt” por That-one-ripper, Sketchfab). Confirme as licenças da source antes
   de distribuir comercialmente.
@@ -162,7 +163,7 @@ js/modes.js           SoloPlay, Lava Run, placar
 js/vrmenu.js          menu VR 3D e HUD 3D
 js/music.js           música de fundo (playlist CC0)
 js/main.js            boot e lobby
-lib/                  three r128, GLTFLoader, SkeletonUtils, PeerJS 1.3.2 (sem CDN obrigatório)
+lib/                  three r128, GLTFLoader, SkeletonUtils, PeerJS 1.5.4 e 1.3.2 (sem CDN obrigatório)
 assets/               modelo, acessórios, mapa, texturas, sons, fonte (extraídos do original) + music/ (CC0)
 original/             o HTML original do Gorilla Rush, intacto
 ```

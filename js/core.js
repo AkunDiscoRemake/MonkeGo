@@ -201,22 +201,17 @@ const SURF=n=>/metal|bronze/.test(n)?2:/bark|log|brown|panel|picnic|crate|cart|k
 let AC=null;const SB=[null,null,null,null],SNDK=['grass','wood','metal','stone'],lastSnd=[0,0];let lastCls=0,gCls=0,gPrev=false,assist=1;
 function initAudio(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();SNDK.forEach((k,i)=>{fetch(ASSET+'sounds/'+SND_FILES[k]+'.mp3').then(r=>r.arrayBuffer()).then(ab=>AC.decodeAudioData(ab,b=>{SB[i]=b},()=>{})).catch(()=>{})});HOOK.audio&&HOOK.audio(AC)}catch(e){AC=null}}
 function tapSound(hand,cls,vol){if(!AC||!SB[cls])return;const n=performance.now();if(n-lastSnd[hand]<90)return;lastSnd[hand]=n;if(AC.state=='suspended')AC.resume();const s=AC.createBufferSource(),g=AC.createGain();s.buffer=SB[cls];s.playbackRate.value=.93+Math.random()*.14;g.gain.value=Math.max(.2,Math.min(1,vol));s.connect(g);g.connect(AC.destination);s.start()}
-const NP='monkego-'; // prefixo próprio: salas MONKE GO não se misturam com clientes Gorilla Rush (PeerJS diferente)
+const NP='grush-'; // prefixo ORIGINAL: MONKE GO entra nas mesmas salas do Gorilla Rush
 let INF={},iPh='wait',iEnd=0,iRem=0,iAt=0,REMI=0,pickCode='',hudS='';
 const isIt=id=>NET.mode=='inf'?!!INF[id]:id===itId;
 function sfx(v){return v=='inf'?'-I':'-C'}
-// ---------- ICE (NAT traversal) ----------
-// Sem TURN, jogadores em redes com NAT restritivo (4G, redes corporativas) não se conectam.
-// Open Relay (metered.ca) é um TURN público gratuito; usa segredo compartilhado (coturn "use-auth-secret"):
-// usuário = "<expiração>:<nome>", senha = base64(HMAC-SHA1(segredo, usuário)).
-let _ice=null;
-async function iceServers(){if(_ice)return _ice;const L=[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:staticauth.openrelay.metered.ca:80'}];
- try{if(window.crypto&&crypto.subtle&&window.TextEncoder){const user=(Math.floor(Date.now()/1000)+86400)+':monkego',enc=new TextEncoder();
-  const k=await crypto.subtle.importKey('raw',enc.encode('openrelayprojectsecret'),{name:'HMAC',hash:'SHA-1'},false,['sign']);
-  const sig=new Uint8Array(await crypto.subtle.sign('HMAC',k,enc.encode(user)));let b='';for(let i=0;i<sig.length;i++)b+=String.fromCharCode(sig[i]);const cred=btoa(b);
-  ['turn:staticauth.openrelay.metered.ca:80','turn:staticauth.openrelay.metered.ca:443','turn:staticauth.openrelay.metered.ca:443?transport=tcp','turns:staticauth.openrelay.metered.ca:443?transport=tcp'].forEach(u=>L.push({urls:u,username:user,credential:cred}))}}catch(e){console.warn('TURN',e)}
- return _ice=L}
-async function initPeer(id){const ice=await iceServers();return new Promise((res,rej)=>{if(!window.Peer)return rej('sem PeerJS');const p=new Peer(id||undefined,{debug:0,config:{iceServers:ice}});const to=setTimeout(()=>{try{p.destroy()}catch(e){}rej('timeout')},12000);p.on('open',()=>{clearTimeout(to);res(p)});
+// ---------- servidores ORIGINAIS ----------
+// Mesmos do Gorilla Rush original: sinalização no servidor público PeerJS (0.peerjs.com, padrão da lib) e os
+// servidores ICE padrão do PeerJS 1.5.4 (STUN Google + TURN peerjs.com). No Oculus Go roda o PeerJS 1.3.2
+// (o 1.5.4 não carrega no Chromium 77); a lista abaixo faz o 1.3.2 usar exatamente os servidores do 1.5.4.
+const ORIGINAL_ICE=[{urls:'stun:stun.l.google.com:19302'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}];
+function iceServers(){return ORIGINAL_ICE}
+async function initPeer(id){const ice=iceServers();return new Promise((res,rej)=>{if(!window.Peer)return rej('sem PeerJS');const p=new Peer(id||undefined,{debug:0,config:{iceServers:ice}});const to=setTimeout(()=>{try{p.destroy()}catch(e){}rej('timeout')},12000);p.on('open',()=>{clearTimeout(to);res(p)});
   // o servidor PeerJS derruba websockets ociosos: reconecta para continuar recebendo novos jogadores
   p.on('disconnected',()=>{if(!p.destroyed&&NET.peer===p)setTimeout(()=>{try{if(!p.destroyed)p.reconnect()}catch(e){}},1500)});p.on('error',e=>{if(e.type=='peer-unavailable'){NET.pend&&NET.pend(false);return}clearTimeout(to);rej(e.type||String(e))})})}
 function hostListen(){NET.peer.on('connection',c=>{c.on('open',()=>{if(Object.keys(NET.conns).length>=7){c.send({t:'full'});setTimeout(()=>c.close(),300);return}NET.conns[c.peer]=c;c.send({t:'hello',pub:NET.pub,code:NET.code,mode:NET.mode,map:HOOK.mapId?HOOK.mapId():''})});
