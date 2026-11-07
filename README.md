@@ -82,16 +82,16 @@ espere 1,5 s (ou toque na tela). O toque continua sendo o pulo, como no original
   ou sala por código (Casual / Infecção). Sincronização, tag, infecção, nomes sobre os jogadores e
   **placar** (menu VR → Placar: quem está com o pegador/infectado e quantos tags cada um fez).
   Como o multiplayer já existia, **não foi usado Supabase** (não há SQL a configurar).
-  Usa os **servidores originais** do Gorilla Rush (ver abaixo) e o mesmo prefixo de sala `grush-`:
-  jogadores da versão Oculus Go e do Gorilla Rush original entram nas mesmas salas.
+  Usa **rede própria**, separada da do Gorilla Rush original: salas com prefixo `grvr-` (o original usa
+  `grush-`) e suporte a um **servidor de sinalização próprio** (pasta `server/`). Configuração em `js/netconfig.js`.
 
 ### O que foi corrigido para o multiplayer funcionar de verdade
 
-- **Servidores originais**: sinalização no servidor público PeerJS (`0.peerjs.com`) e ICE padrão do
-  PeerJS 1.5.4 (STUN `stun.l.google.com:19302` + TURN `eu-0`/`us-0.turn.peerjs.com:3478`), exatamente
-  como no código-fonte. O navegador carrega o **PeerJS 1.5.4** (mesma versão do original); só no Oculus
-  Go, cujo Chromium 77 não executa o 1.5.4, carrega o 1.3.2 configurado com esses mesmos servidores.
-  Compatibilidade testada nos dois sentidos (host/cliente): original ↔ versão Oculus Go com 1.5.4 ↔ com 1.3.2 (Go).
+- **Rede própria** (`js/netconfig.js`): salas `grvr-` exclusivas desta versão. Sinalização: o servidor
+  próprio de `server/` quando configurado (veja `server/README.md` — pronto para o Render gratuito),
+  senão o servidor público do PeerJS. ICE: STUN do Google + TURN do PeerJS. PeerJS 1.5.4 nos navegadores
+  atuais e 1.3.2 no Oculus Go (o Chromium 77 não executa o 1.5.4) — os dois interoperam (testado nos dois
+  sentidos, tanto pelo servidor próprio quanto pelo público).
 - **Timeouts**: entrar numa sala esperava só 2,5 s; pela internet a conexão demora mais e cada jogador
   acabava criando a própria sala. Agora 8–10 s (salas inexistentes continuam sendo descartadas na hora).
 - **Spawn espalhado** no online: antes todos nasciam no mesmo ponto e a Infecção acabava na hora.
@@ -168,8 +168,10 @@ escalada) e no modo celular/Cardboard. **Não foi testado em um Oculus Go físic
 - **Botão Voltar dentro do VR** é reservado pelo sistema; ele encerra o VR (o jogo pausa e oferece voltar).
 - **Texturas comprimidas** (ETC/ASTC/Basis): não usadas — exigiriam reconverter os assets originais e um
   transcoder; as texturas do jogo já são pequenas (JPEG/PNG ≤ 256 px no mapa).
-- **Multiplayer** depende dos servidores públicos do PeerJS (os mesmos do original) e de conexões P2P
-  (WebRTC); se o TURN do PeerJS estiver fora do ar, redes com NAT muito restritivo podem não conectar.
+- **Multiplayer**: enquanto o servidor próprio (`server/`) não for publicado, a sinalização usa o servidor
+  público do PeerJS. O GitHub Pages não executa servidores, por isso ele precisa ir para um host de Node
+  (Render/Railway/Fly). O jogo é P2P (WebRTC); sem um TURN próprio, redes com NAT muito restritivo podem
+  depender do TURN público do PeerJS.
 - **Áudio/música** só iniciam após um toque/clique (política dos navegadores).
 - A origem dos modelos do mapa e do macaco é a da source original; a camisa havaiana é CC BY 4.0
   (“Gorilla Tag Hawaiian T-shirt” por That-one-ripper, Sketchfab). Confirme as licenças da source antes
@@ -191,6 +193,8 @@ js/vrmenu.js          menu VR 3D e HUD 3D
 js/music.js           música de fundo (playlist CC0)
 js/monke.js           estilos Monke/Baboon, quadro no mundo, tag freeze
 js/main.js            boot e lobby
+js/netconfig.js       rede própria: prefixo das salas, servidor de sinalização, STUN/TURN
+server/               servidor de sinalização PeerJS próprio (Node) + blueprint do Render
 lib/                  three r128, GLTFLoader, SkeletonUtils, PeerJS 1.5.4 e 1.3.2 (sem CDN obrigatório)
 assets/               modelo, acessórios, mapa, texturas, sons, fonte (extraídos do original) + music/ (CC0)
 original/             o HTML original do Gorilla Rush, intacto

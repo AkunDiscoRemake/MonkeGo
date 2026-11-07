@@ -1,0 +1,14 @@
+# Blueprint do Render (plano gratuito). Render → New → Blueprint → selecione este repositório.
+services:
+  - type: web
+    name: gorilla-rush-server
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PEER_PATH
+        value: /grvr
+      - key: PEER_KEY
+        value: peerjs

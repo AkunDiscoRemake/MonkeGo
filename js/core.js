@@ -201,17 +201,16 @@ const SURF=n=>/metal|bronze/.test(n)?2:/bark|log|brown|panel|picnic|crate|cart|k
 let AC=null;const SB=[null,null,null,null],SNDK=['grass','wood','metal','stone'],lastSnd=[0,0];let lastCls=0,gCls=0,gPrev=false,assist=1;
 function initAudio(){if(AC)return;try{AC=new(window.AudioContext||window.webkitAudioContext)();SNDK.forEach((k,i)=>{fetch(ASSET+'sounds/'+SND_FILES[k]+'.mp3').then(r=>r.arrayBuffer()).then(ab=>AC.decodeAudioData(ab,b=>{SB[i]=b},()=>{})).catch(()=>{})});HOOK.audio&&HOOK.audio(AC)}catch(e){AC=null}}
 function tapSound(hand,cls,vol){if(!AC||!SB[cls])return;const n=performance.now();if(n-lastSnd[hand]<90)return;lastSnd[hand]=n;if(AC.state=='suspended')AC.resume();const s=AC.createBufferSource(),g=AC.createGain();s.buffer=SB[cls];s.playbackRate.value=.93+Math.random()*.14;g.gain.value=Math.max(.2,Math.min(1,vol));s.connect(g);g.connect(AC.destination);s.start()}
-const NP='grush-'; // prefixo ORIGINAL: a versão Oculus Go entra nas mesmas salas do Gorilla Rush
+const NP=NETCFG.prefix; // salas PRÓPRIAS desta versão (js/netconfig.js); o original usa 'grush-'
 let INF={},iPh='wait',iEnd=0,iRem=0,iAt=0,REMI=0,pickCode='',hudS='';
 const isIt=id=>NET.mode=='inf'?!!INF[id]:id===itId;
 function sfx(v){return v=='inf'?'-I':'-C'}
-// ---------- servidores ORIGINAIS ----------
-// Mesmos do Gorilla Rush original: sinalização no servidor público PeerJS (0.peerjs.com, padrão da lib) e os
-// servidores ICE padrão do PeerJS 1.5.4 (STUN Google + TURN peerjs.com). No Oculus Go roda o PeerJS 1.3.2
-// (o 1.5.4 não carrega no Chromium 77); a lista abaixo faz o 1.3.2 usar exatamente os servidores do 1.5.4.
+// ---------- servidores de rede ----------
+// Configuração própria em js/netconfig.js (prefixo de salas, servidor de sinalização, STUN/TURN).
+// ORIGINAL_ICE fica só como reserva caso NETCFG.ice não exista.
 const ORIGINAL_ICE=[{urls:'stun:stun.l.google.com:19302'},{urls:['turn:eu-0.turn.peerjs.com:3478','turn:us-0.turn.peerjs.com:3478'],username:'peerjs',credential:'peerjsp'}];
-function iceServers(){return ORIGINAL_ICE}
-async function initPeer(id){const ice=iceServers();return new Promise((res,rej)=>{if(!window.Peer)return rej('sem PeerJS');const p=new Peer(id||undefined,{debug:0,config:{iceServers:ice}});const to=setTimeout(()=>{try{p.destroy()}catch(e){}rej('timeout')},12000);p.on('open',()=>{clearTimeout(to);res(p)});
+function iceServers(){return NETCFG.ice||ORIGINAL_ICE}
+async function initPeer(id){const ice=iceServers();return new Promise((res,rej)=>{if(!window.Peer)return rej('sem PeerJS');const p=new Peer(id||undefined,Object.assign({debug:0,config:{iceServers:ice}},NETCFG.server||{}));const to=setTimeout(()=>{try{p.destroy()}catch(e){}rej('timeout')},12000);p.on('open',()=>{clearTimeout(to);res(p)});
   // o servidor PeerJS derruba websockets ociosos: reconecta para continuar recebendo novos jogadores
   p.on('disconnected',()=>{if(!p.destroyed&&NET.peer===p)setTimeout(()=>{try{if(!p.destroyed)p.reconnect()}catch(e){}},1500)});p.on('error',e=>{if(e.type=='peer-unavailable'){NET.pend&&NET.pend(false);return}clearTimeout(to);rej(e.type||String(e))})})}
 function hostListen(){NET.peer.on('connection',c=>{c.on('open',()=>{if(Object.keys(NET.conns).length>=7){c.send({t:'full'});setTimeout(()=>c.close(),300);return}NET.conns[c.peer]=c;c.send({t:'hello',pub:NET.pub,code:NET.code,mode:NET.mode,map:HOOK.mapId?HOOK.mapId():''})});
