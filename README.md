@@ -34,8 +34,15 @@ espere 1,5 s (ou toque na tela). O toque continua sendo o pulo, como no original
 
 - **Mão real**: modelo de braço — ombro fixo no corpo + direção do controle. A *sensibilidade* amplifica o
   ângulo do pulso, então movimentos pequenos de pulso viram braçadas grandes.
-- **Mão simulada**: espelha a mão real com atraso (modo *Alternada*, imita a corrida de gorila),
-  sem atraso (*Espelhada*) ou desligada.
+- **Duas mãos com um controle — "Troca automática" (padrão)**: o controle move uma mão por vez. Quando
+  ela termina uma braçada (encostou numa superfície e levantou), fica **plantada exatamente onde estava**
+  (fixa no mundo, sem tremer) e o controle passa a mover a outra mão — as mãos se revezam como na corrida
+  do Gorilla Tag. Só a mão ativa empurra (sem impulso duplo); a mão que assume parte de onde está
+  (sem salto) e a plantada volta ao corpo quando fica fora de alcance. Testado: 0 mm de tremor na mão
+  plantada; mesmo deslocamento que o modo de uma mão (sem impulso extra).
+- **Estabilização do controle**: filtro adaptativo na orientação 3DoF (suave parado, sem atraso em
+  movimentos rápidos), regulável.
+- Modos antigos ainda disponíveis: *Alternada* (espelho com atraso), *Espelhada*, *Só uma mão*.
 - **Cabeça**: define a direção do corpo.
 - **Física**: o impulso original multiplicado por *Força do impulso* (padrão **2,2×**), limitado pela
   *Velocidade máxima*; colisão contínua vertical para impulsos fortes não atravessarem o chão.
@@ -44,6 +51,16 @@ espere 1,5 s (ou toque na tela). O toque continua sendo o pulo, como no original
 - Ajustáveis (lobby → AJUSTES, ou menu VR → Configurações): velocidade do movimento, força do impulso, velocidade máxima,
   gravidade, atrito, sensibilidade, assistência, comprimento dos braços, qualidade gráfica, mão do
   controle, giro, nomes. Valores ficam salvos no navegador.
+
+## Identidade MONKE
+
+- **Estilos do macaco** (aba ESTILO / menu VR): *Monke* (pelagem marrom e rosto escuro, inspirado no
+  Gorilla Tag — padrão), *Baboon* (cinza-oliva e rosto rosado, inspirado no Scary Baboon) e *Original*.
+  Braços mais longos por padrão (1,32×). Cor e estilo ficam salvos e são enviados aos outros jogadores.
+- **Clareira-lobby** na Floresta com o **quadro MONKE GO** no mundo: modo, sala, lista de monkes com
+  status (pegador/infectado) e tags, como jogar e a música atual.
+- **Tag como nos fan games**: quem é pego congela ~1 s (tag freeze), ouve o som de tag e recebe a skin de
+  lava; o pegador/infectado fica um pouco mais rápido (+15 %).
 
 ## Modos
 
@@ -98,7 +115,7 @@ existem nele (coordenadas extraídas da geometria do próprio mapa):
 
 | Área | Onde fica no mapa original |
 |---|---|
-| Floresta | toco central, árvores, casa na árvore (spawn original) |
+| Floresta | clareira-lobby com o quadro MONKE GO, toco, árvores e casa na árvore |
 | Cânions | paredões `canyon*`, cactos e almofadas gigantes (z ≈ −50) |
 | Cavernas | subsolo com cristais, caixas e carrinhos de mina (y ≈ −14) |
 | Montanhas | penhasco rochoso alto com setas de escalada (spawn de novato original) |
@@ -162,6 +179,7 @@ js/maps.js            áreas do mapa original
 js/modes.js           SoloPlay, Lava Run, placar
 js/vrmenu.js          menu VR 3D e HUD 3D
 js/music.js           música de fundo (playlist CC0)
+js/monke.js           estilos Monke/Baboon, quadro no mundo, tag freeze
 js/main.js            boot e lobby
 lib/                  three r128, GLTFLoader, SkeletonUtils, PeerJS 1.5.4 e 1.3.2 (sem CDN obrigatório)
 assets/               modelo, acessórios, mapa, texturas, sons, fonte (extraídos do original) + music/ (CC0)

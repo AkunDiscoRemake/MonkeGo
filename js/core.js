@@ -291,7 +291,7 @@ function hostTick(dt,now){
 let lastSend=0;
 function netSend(now){if(now-lastSend<80)return;lastSend=now;const r=n=>Math.round(n*100)/100,fw=V3(0,0,-1).applyQuaternion(cam.quaternion),w=Math.atan2(-fw.x,-fw.z),h=[r(tgt[0].x),r(tgt[0].y),r(tgt[0].z),r(tgt[1].x),r(tgt[1].y),r(tgt[1].z)];
  const o=HO[0].d&&HO[1].d?[].concat(...HO.map(q=>[q.d.x,q.d.y,q.d.z,q.A.x,q.A.y,q.A.z,q.c[0],q.c[1],q.c[2]])).map(r):null;
- const self={i:me.id,x:r(P.x),y:r(P.y),z:r(P.z),w:r(w),p:r(Math.asin(Math.max(-1,Math.min(1,fw.y)))),h,c:color,n:me.nick,o,a:[myAcc.g,myAcc.h,myAcc.c,myAcc.y,myAcc.z]};
+ const self={i:me.id,x:r(P.x),y:r(P.y),z:r(P.z),w:r(w),p:r(Math.asin(Math.max(-1,Math.min(1,fw.y)))),h,c:color,n:me.nick,o,a:[myAcc.g,myAcc.h,myAcc.c,myAcc.y,myAcc.z,HOOK.style?HOOK.style():'']}; // a[5] = estilo MONKE (ignorado pelo original)
  if(NET.host){const e=[self];for(const k in RM){const q=RM[k];e.push({i:q.i,x:r(q.x),y:r(q.y),z:r(q.z),w:r(q.w),p:r(q.p||0),h:q.h.map(r),c:q.c,n:q.n,b:q.b,o:q.o,a:q.a})}
   const m={t:'s',it:itId,e,mp:HOOK.mapId?HOOK.mapId():'',sc:SCORE};if(NET.mode=='inf'){m.inf=Object.keys(INF);m.ph=iPh;m.ir=Math.max(0,iEnd-now)}for(const k in NET.conns)try{NET.conns[k].send(m)}catch(x){}}
  else if(NET.hc&&NET.hc.open)NET.hc.send(Object.assign({t:'p'},self))}
@@ -350,8 +350,8 @@ function frame(t){if(!R.xr.isPresenting&&!(HOOK.ownLoop&&HOOK.ownLoop()))request
     nc=[cl(dist(l[4],l[0])/dist(l[2],l[0]),1.15,1.95),fcv(l[5],l[6],l[7],l[8],cl(dist(l[8],l[0])/dist(l[5],l[0]),1.0,1.85)),fcv(l[9],l[10],l[11],l[12],cl(dist(l[12],l[0])/dist(l[9],l[0]),1.0,1.85))];
     if(!ho.d){ho.d=d;ho.A=A}else{ho.d.lerp(d,k2).normalize();ho.A.lerp(A,k2).normalize()}for(let q=0;q<3;q++)ho.c[q]+=(nc[q]-ho.c[q])*(1-Math.exp(-dt*15))}
    else{for(let q=0;q<3;q++)ho.c[q]+=(.3-ho.c[q])*.1;if(ho.d&&!on)ho.d=null}}
-  if(on){hv[i].lerp(hl[i].clone().sub(prev).divideScalar(dt),1-Math.exp(-dt*12));dnS+=Math.max(0,-hv[i].y-.3)}else hv[i].set(0,0,0);
-  if(on&&tc&&tp){const dn=Math.max(0,-hv[i].y-.25),bk=Math.max(0,-hv[i].z-.25),sp2=dn+bk;if(sp2>0){dsum.addScaledVector(fw,sp2*dt*1.15).addScaledVector(rt,-hv[i].x*dt*.3);dsum.y+=dn*dt;n++}}}
+  if(on){hv[i].lerp(hl[i].clone().sub(prev).divideScalar(dt),1-Math.exp(-dt*12));if(!(HOOK.noPush&&HOOK.noPush(i)))dnS+=Math.max(0,-hv[i].y-.3)}else hv[i].set(0,0,0);
+  if(on&&tc&&tp&&!(HOOK.noPush&&HOOK.noPush(i))){const dn=Math.max(0,-hv[i].y-.25),bk=Math.max(0,-hv[i].z-.25),sp2=dn+bk;if(sp2>0){dsum.addScaledVector(fw,sp2*dt*1.15).addScaledVector(rt,-hv[i].x*dt*.3);dsum.y+=dn*dt;n++}}}
  const climbing=HOOK.climb?HOOK.climb(dt,fw,rt):false;
  jumpCool-=dt;if(dnS>.9&&gPrev&&jumpCool<=0){jumpReq=true;jumpCool=.4}
  if(n&&!climbing){const hx=dsum.x,hz=dsum.z,hsp=Math.hypot(hx,hz)/dt;if(hsp>.05){vel.x+=hx*22*TUNE.imp;vel.z+=hz*22*TUNE.imp}if(dsum.y/dt>.6)vel.y=Math.min(5.6*TUNE.jmp,Math.max(vel.y,0)+dsum.y*3.6*TUNE.imp)}

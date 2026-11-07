@@ -47,9 +47,10 @@ $('mnext').onclick=()=>{MUSIC.start();MUSIC.next()};
 addEventListener('vrdisplayactivate',()=>{if(state=='lobby'&&pl&&mapDone&&PLATFORM.pickApi(SETTINGS.vrApi)==='webvr')launch(()=>MODES.start('solo'),true)});
 
 // ---------- ganchos por quadro ----------
-HOOK.playerBuilt=()=>LOCO.applyArms();
+HOOK.playerBuilt=()=>{LOCO.applyArms();MONKE.onPlayer()};
+$('style').value=SETTINGS.style;$('style').onchange=e=>MONKE.setStyle(e.target.value);
 HOOK.pre=dt=>{INPUT.poll(dt);VRMENU.pre(dt)};
-HOOK.post=(dt,now)=>{MODES.update(dt,now);VRMENU.update(dt);HUD3D.update(dt)};
+HOOK.post=(dt,now)=>{MODES.update(dt,now);MONKE.update(dt);VRMENU.update(dt);HUD3D.update(dt)};
 
 // ---------- boot ----------
 LOCO.applyTune();gfx=VRP.effQuality();dpr=prCap();rs();syncLobbySettings();

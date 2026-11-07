@@ -44,6 +44,7 @@ const VRMENU=(function(){
       {l:'Mapas',sub:MAPS.byId(MAPS.cur).name,a:()=>go('maps')},
       {l:'Configurações',a:()=>go('set')},
       {l:'Placar',sub:NET.code?('Sala '+NET.code):'',a:()=>go('score')},
+      {l:'Estilo do macaco',sub:'◀ ▶ Monke / Baboon / Original',val:()=>MONKE.STY[SETTINGS.style].n,adj:d=>{const k=Object.keys(MONKE.STY);let i=k.indexOf(SETTINGS.style);i=(i+d+k.length)%k.length;MONKE.setStyle(k[i])}},
       {l:'Cor do macaco',sub:'◀ ▶',adj:d=>{let i=COLORS.indexOf(color);i=(i+d+COLORS.length)%COLORS.length;setColor(COLORS[i])},swatch:()=>color},
       {l:'Música',sub:MUSIC.now(),val:()=>SETTINGS.music<=0?'DESLIGADA':Math.round(SETTINGS.music*100)+'%',adj:d=>set('music',Math.max(0,Math.min(1,+(SETTINGS.music+d*.1).toFixed(2)))),a:()=>{MUSIC.start();MUSIC.next();M.dirty=true}},
       {l:'Recentralizar giro',a:()=>{VRP.setYaw(0);yw=0;toast('Giro recentralizado',1500)}},

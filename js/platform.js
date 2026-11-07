@@ -34,9 +34,11 @@ const PLATFORM=(function(){
 // ---------- configurações (persistentes em localStorage) ----------
 const SETTINGS=(function(){
   const D={impulse:2.2,maxSpeed:9,gravity:9.8,friction:5.5,sens:1.25,assist:.5,quality:PLATFORM.isGo?0:-1,
-    arm:1.22,simHand:1,speedMode:'fast',music:.35,snap:1,names:1,handed:'auto',vrApi:'auto',map:'forest',mode:'solo',reach:1};
+    arm:1.32,simHand:3,style:'monke',color:'#5b3a24',smooth:.5,speedMode:'fast',music:.35,snap:1,names:1,handed:'auto',vrApi:'auto',map:'forest',mode:'solo',reach:1};
   const S=Object.assign({},D);
   try{const j=JSON.parse(localStorage.getItem('monke_settings')||'{}');for(const k in D)if(k in j&&typeof j[k]===typeof D[k])S[k]=j[k]}catch(e){}
+  // migração: quem já tinha configurações salvas ganha as novas mãos estáveis e braços longos
+  try{if(localStorage.getItem('monke_settings_v')!=='2'){S.simHand=3;S.arm=Math.max(S.arm,1.32);localStorage.setItem('monke_settings_v','2')}}catch(e){}
   S.defaults=D;
   S.save=()=>{try{const o={};for(const k in D)o[k]=S[k];localStorage.setItem('monke_settings',JSON.stringify(o))}catch(e){}};
   S.reset=()=>{for(const k in D)S[k]=D[k];S.save()};
@@ -54,7 +56,8 @@ const SETTING_DEFS=[
   {k:'assist',l:'Assistência',min:0,max:1,step:.1,f:v=>Math.round(v*100)+'%'},
   {k:'arm',l:'Comprimento dos braços',min:1,max:1.45,step:.05,f:v=>v.toFixed(2)+'x'},
   {k:'quality',l:'Qualidade gráfica',opts:[[-1,'Auto'],[0,'Baixa (Go)'],[1,'Média'],[2,'Alta']]},
-  {k:'simHand',l:'Segunda mão',opts:[[0,'Desligada'],[1,'Alternada'],[2,'Espelhada']]},
+  {k:'simHand',l:'Duas mãos (1 controle)',opts:[[3,'Troca automática (estável)'],[1,'Alternada (atraso)'],[2,'Espelhada'],[0,'Só uma mão']]},
+  {k:'smooth',l:'Estabilização do controle',min:0,max:1,step:.1,f:v=>v<=0?'Desligada':Math.round(v*100)+'%'},
   {k:'snap',l:'Giro no touchpad',opts:[[0,'Desligado'],[1,'Snap 30°'],[2,'Snap 45°']]},
   {k:'handed',l:'Mão do controle',opts:[['auto','Auto'],['right','Direita'],['left','Esquerda']]},
   {k:'names',l:'Nomes dos jogadores',opts:[[1,'Mostrar'],[0,'Ocultar']]},
